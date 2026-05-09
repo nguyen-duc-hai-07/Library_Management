@@ -16,6 +16,13 @@ public class Borrow {
         this.borrowDate = LocalDateTime.now();
         this.isDeleted = false;
     }
+    public Borrow(int bookId, int userId, LocalDateTime dueDate) {
+        this.bookId = bookId;
+        this.userId = userId;
+        this.dueDate = dueDate;
+        this.borrowDate = LocalDateTime.now();
+        this.isDeleted = false;
+    }
     public int getId() {
         return id;
     }

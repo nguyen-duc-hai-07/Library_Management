@@ -11,7 +11,7 @@ public class FineResponse {
     private FineStatus status;
     private double fineAmount;
     private int daysLate;
-    private LocalDateTime createdAt;
+    private LocalDateTime paidAt;
 
     public FineResponse() {
     }
@@ -51,10 +51,10 @@ public class FineResponse {
     public void setDaysLate(int daysLate) {
         this.daysLate = daysLate;
     }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getPaidAt() {
+        return paidAt;
     }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setPaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
     }
 }

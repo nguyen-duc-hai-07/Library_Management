@@ -7,6 +7,11 @@ public class Author {
     private String description;
     private boolean isDeleted;
 
+    public Author(String name, int year, String description) {
+        this.name = name;
+        this.year = year;
+        this.description = description;
+    }
     public Author() {
         this.isDeleted = false;
     }

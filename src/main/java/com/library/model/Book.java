@@ -10,12 +10,27 @@ public class Book {
     private String isbn;
     private String name;
     private String publisher;
-    private int publishYear;
+    private String publishYear;
     private int totalQuantity;
     private int availableQuantity;
 
     public Book() {
         this.isDeleted = false;
+        this.availableQuantity = 1;
+        this.totalQuantity = 1;
+    }
+    public Book(int authorId, int categoryId, String title, String description, String isbn, String name, String publisher, String publishYear) {
+        this.authorId = authorId;
+        this.categoryId = categoryId;
+        this.title = title;
+        this.description = description;
+        this.isbn = isbn;
+        this.name = name;
+        this.publisher = publisher;
+        this.publishYear = publishYear;
+        this.isDeleted = false;
+        this.availableQuantity = 1;
+        this.totalQuantity = 1;
     }
     public int getId() {
         return id;
@@ -71,12 +86,6 @@ public class Book {
     public void setPublisher(String publisher) {
         this.publisher = publisher;
     }
-    public int getPublishYear() {
-        return publishYear;
-    }
-    public void setPublishYear(int publishYear) {
-        this.publishYear = publishYear;
-    }
     public int getTotalQuantity() {
         return totalQuantity;
     }
@@ -88,5 +97,11 @@ public class Book {
     }
     public void setAvailableQuantity(int availableQuantity) {
         this.availableQuantity = availableQuantity;
+    }
+    public String getPublishYear() {
+        return publishYear;
+    }
+    public void setPublishYear(String publishYear) {
+        this.publishYear = publishYear;
     }
 }

@@ -9,6 +9,7 @@ public class UserRequest {
     private String phoneNumber;
     private String passwordHash;
     private UserRole role;
+    private UserStatus status;
 
     public UserRequest() {
     }
@@ -42,5 +43,11 @@ public class UserRequest {
     }
     public void setRole(UserRole role) {
         this.role = role;
+    }
+    public UserStatus getStatus() {
+        return status;
+    }
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }

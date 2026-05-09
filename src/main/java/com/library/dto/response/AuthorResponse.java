@@ -9,6 +9,12 @@ public class AuthorResponse {
     private String description;
     private List<BookResponse> books;
 
+    public AuthorResponse(int id, String name, int year, String description) {
+        this.id = id;
+        this.name = name;
+        this.year = year;
+        this.description = description;
+    }
     public int getId() {
         return id;
     }

@@ -16,8 +16,18 @@ public class UserResponse {
     private UserStatus status;
     private LocalDateTime createdAt;
     private List<BookResponse> books;
+    private List<FineResponse> fines;
 
     public UserResponse() {
+        this.createdAt = LocalDateTime.now();
+    }
+    public UserResponse(int id, String fullName, String email, String phoneNumber, UserRole role, UserStatus status, LocalDateTime createdAt) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.status = status;
         this.createdAt = LocalDateTime.now();
     }
     public int getId() {
@@ -67,5 +77,11 @@ public class UserResponse {
     }
     public void setBooks(List<BookResponse> books) {
         this.books = books;
+    }
+    public List<FineResponse> getFines() {
+        return fines;
+    }
+    public void setFines(List<FineResponse> fines) {
+        this.fines = fines;
     }
 }
