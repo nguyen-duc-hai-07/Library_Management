@@ -1,5 +1,6 @@
 package com.library.dao;
 
+import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.response.BorrowResponse;
 import com.library.model.Borrow;
 
@@ -12,7 +13,7 @@ public interface BorrowDao {
 
     BorrowResponse getBorrowById(Connection conn, int id) throws SQLException;
 
-    List<BorrowResponse> getAllBorrows(Connection conn) throws SQLException;
+    List<BorrowResponse> getBorrowsWithFilter(Connection conn, BorrowFilterRequest filter) throws SQLException;
 
     void delete(Connection conn, int id) throws SQLException;
 

@@ -1,5 +1,6 @@
 package com.library.service;
 
+import com.library.dto.request.FineFilterRequest;
 import com.library.dto.request.FineRequest;
 import com.library.dto.response.FineResponse;
 
@@ -16,5 +17,5 @@ public interface FineService {
 
     void softDeleteFine(int id) throws Exception;
 
-    List<FineResponse> viewAllFines() throws Exception;
+    List<FineResponse> viewFinesWithFilter(FineFilterRequest filter) throws Exception;
 }

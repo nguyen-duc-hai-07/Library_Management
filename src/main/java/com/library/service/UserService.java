@@ -1,5 +1,6 @@
 package com.library.service;
 
+import com.library.dto.request.UserFilterRequest;
 import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
@@ -8,6 +9,8 @@ import java.util.List;
 
 
 public interface UserService {
+    List<UserResponse> viewUsersWithFilter(UserFilterRequest filter) throws Exception;
+
     UserResponse createUser(UserRequest request) throws Exception;
 
     UserResponse viewUserById(int id) throws Exception;

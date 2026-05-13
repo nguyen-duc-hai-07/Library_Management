@@ -2,6 +2,7 @@ package com.library.service.impl;
 
 import com.library.config.DBConnectionPool;
 import com.library.dao.UserDao;
+import com.library.dto.request.UserFilterRequest;
 import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
@@ -24,6 +25,38 @@ public class UserServiceImpl implements UserService {
         this.userDao = userDao;
     }
 
+    public List<UserResponse> viewUsersWithFilter(UserFilterRequest filter) throws Exception {
+        Connection conn = null;
+        log.info(
+                "View users with filter: keyword={}, role={}, status={}, page={}, size={}",
+                filter.getKeyword(),
+                filter.getRole(),
+                filter.getStatus(),
+                filter.getPage(),
+                filter.getSize()
+        );
+        try {
+            conn = pool.getConnection();
+
+            List<UserResponse> userResponses = userDao.getUsersWihFilter(conn, filter);
+
+            conn.commit();
+
+            log.info("Users found successfully, total = {}", userResponses.size() );
+
+            return userResponses;
+        } catch (Exception e) {
+            log.error("View users with filter failed: {}", e.getMessage(), e);
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.close();
+            }
+        }
+    }
     public UserResponse createUser(UserRequest request) throws Exception {
         Connection conn = null;
         User user = new User(
@@ -74,6 +107,10 @@ public class UserServiceImpl implements UserService {
             conn = pool.getConnection();
 
             UserResponse user = userDao.getUserById(conn , id);
+            if (user == null) {
+                log.warn("User not found with id={}", id);
+                throw new Exception("User not found");
+            }
 
             conn.commit();
 

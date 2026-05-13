@@ -1,11 +1,18 @@
 package com.library.service.impl;
 
 import com.library.config.DBConnectionPool;
+import com.library.dao.AuthorDao;
 import com.library.dao.BookDao;
+import com.library.dao.CategoryDao;
+import com.library.dto.request.BookFilterRequest;
 import com.library.dto.request.BookRequest;
+import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
+import com.library.dto.response.CategoryResponse;
 import com.library.dto.response.UserResponse;
+import com.library.model.Author;
 import com.library.model.Book;
+import com.library.model.Category;
 import com.library.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,10 +24,14 @@ import java.util.List;
 @Service
 public class BookServiceImpl implements BookService {
     private final BookDao bookDao;
+    private final AuthorDao authorDao;
+    private final CategoryDao categoryDao;
     private final DBConnectionPool pool = DBConnectionPool.getInstance();
 
-    public BookServiceImpl(BookDao bookDao) {
+    public BookServiceImpl(BookDao bookDao, AuthorDao authorDao, CategoryDao categoryDao) {
         this.bookDao = bookDao;
+        this.authorDao = authorDao;
+        this.categoryDao = categoryDao;
     }
 
     public BookResponse createBook(BookRequest bookRequest) throws Exception {
@@ -38,6 +49,18 @@ public class BookServiceImpl implements BookService {
         log.info("Create book");
         try {
             conn = pool.getConnection();
+
+            AuthorResponse author = authorDao.getAuthorById(conn, bookRequest.getAuthorId());
+
+            if (author == null || author.getIsDeleted()) {
+                throw new RuntimeException("Author not found");
+            }
+
+            CategoryResponse category = categoryDao.getCategoryById(conn, bookRequest.getCategoryId());
+
+            if (category == null || category.getIsDeleted()) {
+                throw new RuntimeException("Category not found");
+            }
 
             bookDao.insert(conn, book);
 
@@ -66,6 +89,10 @@ public class BookServiceImpl implements BookService {
             conn = pool.getConnection();
 
             BookResponse book = bookDao.getBookById(conn, id);
+            if (book == null) {
+                log.warn("Book not found with id={}", id);
+                throw new Exception("Book not found");
+            }
 
             conn.commit();
 
@@ -86,21 +113,28 @@ public class BookServiceImpl implements BookService {
         }
     }
 
-    public List<BookResponse> viewAllBooks() throws Exception {
+    public List<BookResponse> viewBooksWithFilter(BookFilterRequest filter) throws Exception {
         Connection conn = null;
-        log.info("View all books");
+        log.info(
+                "View books with filter: keyword={}, page={}, size={}",
+                filter.getKeyword(),
+                filter.getPage(),
+                filter.getSize()
+        );
         try {
             conn = pool.getConnection();
 
-            List<BookResponse> books = bookDao.getAllBooks(conn);
+            List<BookResponse> books = bookDao.getBooksWithFilter(conn, filter);
 
             conn.commit();
 
-            log.info("All books found successfully");
+            log.info("Books found successfully, total={}", books.size());
 
             return books;
         } catch (Exception e) {
-            log.error("Error viewing all books: {}", e.getMessage());
+
+            log.error("Error viewing books with filter: {}", e.getMessage(), e);
+
             if (conn != null) {
                 conn.rollback();
             }

@@ -1,6 +1,7 @@
 package com.library.dao.impl;
 
 import com.library.dao.FineDao;
+import com.library.dto.request.FineFilterRequest;
 import com.library.dto.response.FineResponse;
 import com.library.model.Fine;
 import com.library.model.FineStatus;
@@ -51,11 +52,20 @@ public class FineDaoImpl implements FineDao {
         }
     }
 
-    public List<FineResponse> getAllFines(Connection conn) throws SQLException {
-        String sql = "SELECT id, borrow_id, user_id, days_late, fine_amount, status, paid_at FROM fines WHERE is_deleted = FALSE";
-        try(PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()
-        ) {
+    public List<FineResponse> getFinesWithFilter(Connection conn, FineFilterRequest filter) throws SQLException {
+        String sql = """
+                SELECT id, borrow_id, user_id, days_late, fine_amount, status, paid_at
+                FROM fines
+                WHERE is_deleted = FALSE
+                AND status = ?::fine_status
+                LIMIT ?
+                OFFSET ?
+                """;
+        try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, filter.getStatus().name());
+            ps.setInt(2, filter.getSize());
+            ps.setInt(3, (filter.getPage() -1) * filter.getSize());
+            ResultSet rs = ps.executeQuery();
             List<FineResponse> fineResponse = new ArrayList<>();
             while(rs.next()) {
                 FineResponse fine = new FineResponse();
@@ -67,9 +77,8 @@ public class FineDaoImpl implements FineDao {
                 fine.setStatus(FineStatus.valueOf(rs.getString("status")));
                 fine.setPaidAt(rs.getTimestamp("paid_at") != null ? rs.getTimestamp("paid_at").toLocalDateTime() : null);
                 fineResponse.add(fine);
-                return fineResponse;
             }
-            return null;
+            return fineResponse;
         }
     }
 

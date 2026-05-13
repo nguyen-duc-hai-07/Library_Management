@@ -1,6 +1,7 @@
 package com.library.dao.impl;
 
 import com.library.dao.CategoryDao;
+import com.library.dto.request.CategoryFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
 import com.library.model.Category;
@@ -26,7 +27,7 @@ public class CategoryDaoImpl implements CategoryDao {
     }
 
     public CategoryResponse getCategoryById(Connection conn, int id) throws SQLException {
-        String sql = "SELECT * FROM categories WHERE id = ? AND is_deleted = FALSE";
+        String sql = "SELECT id,name,is_deleted FROM categories WHERE id = ? AND is_deleted = FALSE";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -35,18 +36,28 @@ public class CategoryDaoImpl implements CategoryDao {
                 CategoryResponse category = new CategoryResponse();
                 category.setId(rs.getInt("id"));
                 category.setName(rs.getString("name"));
+                category.setIsDeleted(rs.getBoolean("is_deleted"));
                 return category;
             }
             return null;
         }
     }
 
-    public List<CategoryResponse> getAllCategories(Connection conn) throws SQLException {
-        String sql = "SELECT * FROM categories WHERE is_deleted = FALSE";
+    public List<CategoryResponse> getCategoriesWithFilter(Connection conn, CategoryFilterRequest filter) throws SQLException {
+        String sql = """
+                 SELECT id,name
+                 FROM categories
+                 WHERE is_deleted = FALSE
+                 AND name ILIKE ?
+                 LIMIT ?
+                 OFFSET ?
+                 """;
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()
-        ) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + filter.getKeyword() + "%");
+            ps.setInt(2, filter.getSize());
+            ps.setInt(3, (filter.getPage() - 1) * filter.getSize());
+            ResultSet rs = ps.executeQuery();
             List<CategoryResponse> categoryResponse = new ArrayList<>();
             while (rs.next()) {
                 CategoryResponse categories = new CategoryResponse();

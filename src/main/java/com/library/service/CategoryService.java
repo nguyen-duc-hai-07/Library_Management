@@ -1,5 +1,6 @@
 package com.library.service;
 
+import com.library.dto.request.CategoryFilterRequest;
 import com.library.dto.request.CategoryRequest;
 import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
@@ -12,7 +13,7 @@ import java.util.List;
 public interface CategoryService {
     CategoryResponse createCategory(CategoryRequest request) throws Exception;
 
-    List<CategoryResponse> viewAllCategories() throws Exception;
+    List<CategoryResponse> viewCategoriesWithFilter(CategoryFilterRequest filter) throws Exception;
 
     CategoryResponse viewCategoryById(int id) throws Exception;
 

@@ -1,5 +1,6 @@
 package com.library.dao;
 
+import com.library.dto.request.UserFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
 import com.library.dto.response.UserResponse;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.sql.Connection;
 
 public interface UserDao {
+    List<UserResponse> getUsersWihFilter(Connection conn , UserFilterRequest filter) throws Exception;
+
     void insert(Connection conn, User user) throws SQLException;
 
     void update(Connection conn, User user) throws SQLException;

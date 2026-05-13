@@ -1,8 +1,11 @@
 package com.library.dto.request;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.library.model.UserRole;
 import com.library.model.UserStatus;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserRequest {
     private String fullName;
     private String email;

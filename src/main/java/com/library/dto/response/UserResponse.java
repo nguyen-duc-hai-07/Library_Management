@@ -1,5 +1,7 @@
 package com.library.dto.response;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.library.model.Book;
 import com.library.model.UserRole;
 import com.library.model.UserStatus;
@@ -7,6 +9,7 @@ import com.library.model.UserStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserResponse {
     private int id;
     private String fullName;

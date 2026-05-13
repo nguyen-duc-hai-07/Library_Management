@@ -1,5 +1,6 @@
 package com.library.dao;
 
+import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.AuthorResponse;
 import com.library.model.Author;
@@ -13,7 +14,7 @@ public interface AuthorDao {
 
     AuthorResponse getAuthorById(Connection conn , int id) throws SQLException;
 
-    List<AuthorResponse> getAllAuthors(Connection conn) throws SQLException;
+    List<AuthorResponse> getAuthorsWithFilter(Connection conn , AuthorFilterRequest filter) throws SQLException;
 
     void update(Connection conn , Author author) throws SQLException;
 

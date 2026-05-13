@@ -1,6 +1,7 @@
 package com.library.dao.impl;
 
 import com.library.dao.BorrowDao;
+import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.response.BorrowResponse;
 import com.library.model.Borrow;
 import com.library.model.BorrowStatus;
@@ -40,7 +41,7 @@ public class BorrowDaoImpl implements BorrowDao {
                 borrow.setUserId(rs.getInt("user_id"));
                 borrow.setBorrowDate(rs.getTimestamp("borrow_date").toLocalDateTime());
                 borrow.setReturnDate(rs.getTimestamp("return_date") != null ? rs.getTimestamp("return_date").toLocalDateTime() : null);
-                borrow.setDueDate(rs.getTimestamp("due_status").toLocalDateTime());
+                borrow.setDueDate(rs.getTimestamp("due_date").toLocalDateTime());
                 borrow.setStatus(BorrowStatus.valueOf(rs.getString("status")));
                 return borrow;
             }
@@ -48,9 +49,19 @@ public class BorrowDaoImpl implements BorrowDao {
         }
     }
 
-    public List<BorrowResponse> getAllBorrows(Connection conn) throws SQLException {
-        String sql = "SELECT id, book_id, user_id, borrow_date,return_date, due_date, status FROM borrows WHERE is_deleted = FALSE";
+    public List<BorrowResponse> getBorrowsWithFilter(Connection conn, BorrowFilterRequest filter) throws SQLException {
+        String sql = """
+                  SELECT id, book_id, user_id, borrow_date,return_date, due_date, status
+                  FROM borrows
+                  WHERE is_deleted = FALSE
+                  AND status = ?::borrow_status
+                  LIMIT ?
+                  OFFSET ?
+                  """;
         try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, filter.getStatus().toString());
+            ps.setInt(2, filter.getSize());
+            ps.setInt(3, (filter.getPage() -1) * filter.getSize());
             ResultSet rs = ps.executeQuery();
             List<BorrowResponse> borrowResponse = new java.util.ArrayList<>();
             while(rs.next()) {
@@ -63,9 +74,8 @@ public class BorrowDaoImpl implements BorrowDao {
                 borrow.setDueDate(rs.getTimestamp("due_date").toLocalDateTime());
                 borrow.setStatus(BorrowStatus.valueOf(rs.getString("status")));
                 borrowResponse.add(borrow);
-                return borrowResponse;
             }
-            return null;
+            return borrowResponse;
         }
     }
 

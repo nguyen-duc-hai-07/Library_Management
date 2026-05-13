@@ -1,12 +1,14 @@
 package com.library.dao.impl;
 
 import com.library.dao.AuthorDao;
+import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
 import com.library.model.Author;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -28,7 +30,7 @@ public class AuthorDaoImpl implements AuthorDao {
     }
 
     public AuthorResponse getAuthorById(Connection conn , int id) throws SQLException {
-        String sql = "SELECT id,name,birth_year,description FROM authors WHERE id = ? AND is_deleted = FALSE";
+        String sql = "SELECT id, name, birth_year, description, is_deleted FROM authors WHERE id = ? AND is_deleted = FALSE";
 
         try(PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1,id);
@@ -39,18 +41,29 @@ public class AuthorDaoImpl implements AuthorDao {
                 author.setName(rs.getString("name"));
                 author.setYear(rs.getInt("birth_year"));
                 author.setDescription(rs.getString("description"));
+                author.setIsDeleted(rs.getBoolean("is_deleted"));
                 return author;
             }
             return null;
         }
     }
 
-    public List<AuthorResponse> getAllAuthors(Connection conn) throws SQLException {
-        String sql = "SELECT id,name,birth_year,description FROM authors AND is_deleted = FALSE";
+    public List<AuthorResponse> getAuthorsWithFilter(Connection conn , AuthorFilterRequest filter) throws SQLException {
+        String sql = """
+                  SELECT id,name,birth_year,description
+                  FROM authors
+                  Where is_deleted = FALSE
+                  AND name ILIKE ?
+                  LIMIT ?
+                  OFFSET ?
+                  """;
 
         try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1,"%" + filter.getKeyword() + "%");
+            ps.setInt(2, filter.getSize());
+            ps.setInt(3, (filter.getPage() -1) * filter.getSize());
             ResultSet rs = ps.executeQuery();
-            List<AuthorResponse> authorResponse = new java.util.ArrayList<>();
+            List<AuthorResponse> authorResponse = new ArrayList<>();
             while(rs.next()) {
                 AuthorResponse author = new AuthorResponse();
                 author.setId(rs.getInt("id"));
@@ -108,7 +121,7 @@ public class AuthorDaoImpl implements AuthorDao {
         try(PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1,id);
             ResultSet rs = ps.executeQuery();
-            List<BookResponse> bookResponse = new java.util.ArrayList<>();
+            List<BookResponse> bookResponse = new ArrayList<>();
             while(rs.next()) {
                 BookResponse books = new BookResponse();
                 books.setId(rs.getInt("id"));
@@ -119,9 +132,8 @@ public class AuthorDaoImpl implements AuthorDao {
                 books.setCategoryId(rs.getInt("category_id"));
                 books.setAuthorId(rs.getInt("author_id"));
                 bookResponse.add(books);
-                return bookResponse;
             }
-            return null;
+            return bookResponse;
         }
     }
 }

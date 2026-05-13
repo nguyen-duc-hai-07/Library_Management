@@ -4,6 +4,7 @@ import com.library.config.DBConnectionPool;
 import com.library.dao.BorrowDao;
 import com.library.dao.FineDao;
 import com.library.dao.UserDao;
+import com.library.dto.request.FineFilterRequest;
 import com.library.dto.request.FineRequest;
 import com.library.dto.response.BorrowResponse;
 import com.library.dto.response.FineResponse;
@@ -16,6 +17,7 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -30,12 +32,8 @@ public class FineServiceImpl implements FineService {
 
     public FineResponse createFineForLateReturn(FineRequest fineRequest) throws Exception {
         Connection conn = null;
-        Fine fine = new Fine(
-                fineRequest.getUserId(),
-                fineRequest.getBorrowId(),
-                fineRequest.getFineAmount(),
-                fineRequest.getDaysLate()
-        );
+        Fine fine = new Fine();
+        fine.setBorrowId(fineRequest.getBorrowId());
         log.info("Late return detected for borrowId={}, fine created",  fineRequest.getBorrowId());
         try {
             conn = pool.getConnection();
@@ -45,8 +43,9 @@ public class FineServiceImpl implements FineService {
                 log.warn("Borrow not found with id={}", fineRequest.getBorrowId());
                 throw new Exception("Borrow not found");
             }
+            fine.setUserId(borrow.getUserId());
 
-            int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate(), LocalDate.now());
+            int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
             if (daysLate <= 0) {
                 log.warn("Borrow is not late");
                 throw new Exception("Borrow is not late");
@@ -91,7 +90,7 @@ public class FineServiceImpl implements FineService {
 
             BorrowResponse borrow = borrowDao.getBorrowById(conn, fine.getBorrowId());
 
-            int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate(), LocalDate.now());
+            int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
 
             double fineAmount = daysLate * 10000;
 
@@ -208,18 +207,23 @@ public class FineServiceImpl implements FineService {
         }
     }
 
-    public List<FineResponse> viewAllFines() throws Exception {
+    public List<FineResponse> viewFinesWithFilter(FineFilterRequest filter) throws Exception {
         Connection conn = null;
-        log.info("View all fines");
+        log.info(
+                "View fines with filter: status={}, page = {}, size = {}",
+                filter.getStatus(),
+                filter.getPage(),
+                filter.getSize()
+        );
         try {
             conn = pool.getConnection();
 
-            List<FineResponse> fines = fineDao.getAllFines(conn);
+            List<FineResponse> fines = fineDao.getFinesWithFilter(conn, filter);
 
             for(FineResponse fine : fines) {
                 BorrowResponse borrow = borrowDao.getBorrowById(conn, fine.getBorrowId());
 
-                int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate(), LocalDate.now());
+                int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
 
                 double fineAmount = daysLate * 10000;
 
@@ -231,11 +235,11 @@ public class FineServiceImpl implements FineService {
 
             conn.commit();
 
-            log.info("All fines found successfully");
+            log.info("fines found successfully, total= {}", fines.size());
 
             return fines;
         } catch (Exception e) {
-            log.error("Error viewing all fines: {}", e.getMessage());
+            log.error("view fines with filter failed: {}", e.getMessage());
             if (conn != null) {
                 conn.rollback();
             }

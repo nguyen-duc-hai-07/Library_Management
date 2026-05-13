@@ -1,11 +1,14 @@
 package com.library.dao.impl;
 
 import com.library.dao.UserDao;
+import com.library.dto.request.UserFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
 import com.library.dto.response.UserResponse;
 import com.library.model.FineStatus;
 import com.library.model.User;
+import com.library.model.UserRole;
+import com.library.model.UserStatus;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -14,6 +17,48 @@ import java.util.List;
 
 @Repository
 public class UserDaoImpl implements UserDao {
+    public List<UserResponse> getUsersWihFilter(Connection conn , UserFilterRequest filter) throws Exception {
+        String sql = """
+                SELECT id,full_name,email,phone_number,role,status,created_at
+                FROM users
+                WHERE is_deleted = FALSE
+                AND (
+                      full_name ILIKE ?
+                      OR email ILIKE ?
+                      )
+                AND role = ?::user_role
+                AND status = ?::user_status
+                ORDER BY created_at DESC
+                LIMIT ?
+                OFFSET ?
+                """;
+        try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1,"%" + filter.getKeyword() + "%");
+            ps.setString(2,"%" + filter.getKeyword() + "%");
+            ps.setString(3,filter.getRole().name());
+            ps.setString(4,filter.getStatus().name());
+            ps.setInt(5,filter.getSize());
+            ps.setInt(6,(filter.getPage() -1) * filter.getSize());
+
+            List<UserResponse> userResponse = new ArrayList<>();
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                UserResponse user = new UserResponse();
+                user.setId(rs.getInt("id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setRole(UserRole.valueOf(rs.getString("role")));
+                user.setStatus(UserStatus.valueOf(rs.getString("status")));
+                user.setCreatedAt(
+                        rs.getTimestamp("created_at")
+                                .toLocalDateTime()
+                );
+                userResponse.add(user);
+            }
+            return userResponse;
+        }
+    }
     public void insert(Connection conn, User user) throws SQLException {
         String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, role, status) VALUES (?, ?, ?, ?, ?::user_role, ?::user_status)";
 
@@ -60,7 +105,7 @@ public class UserDaoImpl implements UserDao {
     }
 
     public UserResponse getUserById(Connection conn, int id) throws SQLException {
-        String sql = "SELECT * FROM users WHERE id = ? AND is_deleted = FALSE";
+        String sql = "SELECT id,full_name,email,phone_number,role,status,created_at FROM users WHERE id = ? AND is_deleted = FALSE";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -71,7 +116,13 @@ public class UserDaoImpl implements UserDao {
                 userResponse.setId(rs.getInt("id"));
                 userResponse.setFullName(rs.getString("full_name"));
                 userResponse.setEmail(rs.getString("email"));
-                userResponse.setEmail(rs.getString("email"));
+                userResponse.setPhoneNumber(rs.getString("phone_number"));
+                userResponse.setRole(UserRole.valueOf(rs.getString("role")));
+                userResponse.setStatus(UserStatus.valueOf(rs.getString("status")));
+                userResponse.setCreatedAt(
+                        rs.getTimestamp("created_at")
+                                .toLocalDateTime()
+                );
                 return userResponse;
             }
             return null;
@@ -136,7 +187,7 @@ public class UserDaoImpl implements UserDao {
             UPDATE users
             SET is_deleted = TRUE
             WHERE id = ?
-                AND is_deleted = FALSE
+            AND is_deleted = FALSE
             """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

@@ -1,9 +1,7 @@
 package com.library.dao;
 
-import com.library.dto.response.BookResponse;
+import com.library.dto.request.FineFilterRequest;
 import com.library.dto.response.FineResponse;
-import com.library.dto.response.UserResponse;
-import com.library.model.Book;
 import com.library.model.Fine;
 
 import java.sql.Connection;
@@ -15,7 +13,7 @@ public interface FineDao {
 
     FineResponse getFineById(Connection conn, int id) throws SQLException;
 
-    List<FineResponse> getAllFines(Connection conn) throws SQLException;
+    List<FineResponse> getFinesWithFilter(Connection conn, FineFilterRequest filter) throws SQLException;
 
     void delete(Connection conn, int id) throws SQLException;
 

@@ -1,5 +1,6 @@
 package com.library.dao;
 
+import com.library.dto.request.CategoryFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
 import com.library.model.Category;
@@ -13,7 +14,7 @@ public interface CategoryDao {
 
     CategoryResponse getCategoryById(Connection conn, int id) throws SQLException;
 
-    List<CategoryResponse> getAllCategories(Connection conn) throws SQLException;
+    List<CategoryResponse> getCategoriesWithFilter(Connection conn, CategoryFilterRequest filter) throws SQLException;
 
     void update(Connection conn, Category category) throws SQLException;
 

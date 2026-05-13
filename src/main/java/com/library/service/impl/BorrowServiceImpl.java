@@ -4,6 +4,8 @@ import com.library.config.DBConnectionPool;
 import com.library.dao.BookDao;
 import com.library.dao.BorrowDao;
 import com.library.dao.UserDao;
+import com.library.dto.request.BookFilterRequest;
+import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.BorrowResponse;
@@ -78,19 +80,36 @@ public class BorrowServiceImpl implements BorrowService {
         }
     }
 
-    public List<BorrowResponse> viewAllBorrows() throws Exception {
+    public List<BorrowResponse> viewBorrowsWithFilter(BorrowFilterRequest filter) throws Exception {
         Connection conn = null;
-        log.info("View all borrows");
+        log.info(
+                "View borrows with filter: status={}, page={}, size={}",
+                filter.getStatus(),
+                filter.getPage(),
+                filter.getSize()
+        );
         try {
             conn = pool.getConnection();
 
-            return borrowDao.getAllBorrows(conn);
+            List<BorrowResponse> borrows = borrowDao.getBorrowsWithFilter(conn, filter);
+
+            conn.commit();
+
+            log.info("Borrows found successfully, total={}", borrows.size() );
+
+            return borrows;
+
 
         } catch (Exception e) {
             log.error("Error viewing all borrows: {}", e.getMessage(), e);
+            if (conn != null) {
+                conn.rollback();
+            }
             throw e;
         } finally {
-            if (conn != null) {}
+            if (conn != null) {
+                conn.close();
+            }
         }
     }
 
@@ -100,7 +119,17 @@ public class BorrowServiceImpl implements BorrowService {
         try {
             conn = pool.getConnection();
 
-            return borrowDao.getBorrowById(conn, id);
+            BorrowResponse borrow = borrowDao.getBorrowById(conn, id);
+            if (borrow == null) {
+                log.warn("Borrow not found with id={}", id);
+                throw new Exception("Borrow not found");
+            }
+
+            conn.commit();
+
+            log.info("Borrow found successfully");
+
+            return borrow;
 
         } catch (Exception e) {
             log.error("Error viewing borrow with id = {}: {}", id, e.getMessage(), e);
@@ -153,6 +182,7 @@ public class BorrowServiceImpl implements BorrowService {
             BorrowResponse borrow = borrowDao.getBorrowById(conn, id);
             if (borrow == null) {
                 log.warn("Borrow not found with id={}", id);
+                throw new Exception("Borrow not found");
             }
 
             borrowDao.softDelete(conn, id);

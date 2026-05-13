@@ -1,6 +1,7 @@
 package com.library.dao.impl;
 
 import com.library.dao.BookDao;
+import com.library.dto.request.BookFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.UserResponse;
 import com.library.model.Book;
@@ -35,45 +36,53 @@ public class BookDaoImpl implements BookDao {
     }
 
     public BookResponse getBookById(Connection conn , int id) throws SQLException {
-        String sql = "SELECT id, isbn, title, author_id, category_id, publisher, publish_year, description, total_quantity, available_quantity FROM books WHERE is_deleted = FALSE";
+        String sql = "SELECT id, isbn,name, title, author_id, category_id, publisher, publish_year, description, total_quantity, available_quantity FROM books WHERE is_deleted = FALSE AND id = ?";
         try(PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1,id);
             ResultSet rs = ps.executeQuery();
             if(rs.next()) {
                 BookResponse book = new BookResponse();
-                book.setId(rs.getInt(1));
-                book.setIsbn(rs.getString(2));
-                book.setTitle(rs.getString(3));
-                book.setAuthorId(rs.getInt(4));
-                book.setCategoryId(rs.getInt(5));
-                book.setPublisher(rs.getString(6));
-                book.setPublishYear(rs.getString(7));
-                book.setDescription(rs.getString(8));
-                book.setTotalQuantity(rs.getInt(9));
-                book.setAvailableQuantity(rs.getInt(10));
+                book.setId(rs.getInt("id"));
+                book.setIsbn(rs.getString("isbn"));
+                book.setName(rs.getString("name"));
+                book.setTitle(rs.getString("title"));
+                book.setAuthorId(rs.getInt("author_id"));
+                book.setCategoryId(rs.getInt("category_id"));
+                book.setPublisher(rs.getString("publisher"));
+                book.setPublishYear(rs.getString("publish_year"));
+                book.setDescription(rs.getString("description"));
+                book.setTotalQuantity(rs.getInt("total_quantity"));
+                book.setAvailableQuantity(rs.getInt("available_quantity"));
                 return book;
             }
             return null;
         }
     }
 
-    public List<BookResponse> getAllBooks(Connection conn) throws SQLException {
+    public List<BookResponse> getBooksWithFilter(Connection conn, BookFilterRequest filter) throws SQLException {
         String sql = """
-                SELECT b.id,b.isbn,  b.title,  b.author_id, a.name AS author_name, b.category_id,c.name AS category_name,  b.publisher,  b.publish_year, b.description, b.total_quantity, b.available_quantity
+                SELECT b.id,b.name,b.isbn,  b.title,  b.author_id, a.name AS author_name, b.category_id,c.name AS category_name,  b.publisher,  b.publish_year, b.description, b.total_quantity, b.available_quantity
                 FROM books b
                 JOIN authors a ON b.author_id = a.id
                 JOIN categories c ON b.category_id = c.id
                 WHERE b.is_deleted = FALSE
                 AND a.is_deleted = FALSE
                 AND c.is_deleted = FALSE
+                AND b.title ILIKE ?
+                LIMIT ?
+                OFFSET ?
                 """;
 
         try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + filter.getKeyword() + "%");
+            ps.setInt(2, filter.getSize());
+            ps.setInt(3, (filter.getPage() -1) * filter.getSize());
             ResultSet rs = ps.executeQuery();
             List<BookResponse> bookResponse = new java.util.ArrayList<>();
             while(rs.next()) {
                 BookResponse books = new BookResponse();
                 books.setId(rs.getInt("id"));
+                books.setName(rs.getString("name"));
                 books.setIsbn(rs.getString("isbn"));
                 books.setTitle(rs.getString("title"));
                 books.setAuthorId(rs.getInt("author_id"));
@@ -86,9 +95,8 @@ public class BookDaoImpl implements BookDao {
                 books.setTotalQuantity(rs.getInt("total_quantity"));
                 books.setAvailableQuantity(rs.getInt("available_quantity"));
                 bookResponse.add(books);
-                return bookResponse;
             }
-            return null;
+            return bookResponse;
         }
     }
 
@@ -156,9 +164,8 @@ public class BookDaoImpl implements BookDao {
                 user.setEmail(rs.getString("email"));
                 user.setPhoneNumber(rs.getString("phone_number"));
                 userResponse.add(user);
-                return userResponse;
             }
-            return null;
+            return userResponse;
         }
     }
     public void updateBorrowedQuantity(Connection conn, int id, int quantity) throws SQLException {

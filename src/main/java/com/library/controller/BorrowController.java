@@ -1,5 +1,6 @@
 package com.library.controller;
 
+import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BorrowResponse;
 import com.library.service.BorrowService;
@@ -18,39 +19,60 @@ public class BorrowController {
         this.borrowService = borrowService;
     }
 
-    @GetMapping
-    public List<BorrowResponse> getAllBorrows() throws Exception {
-        log.info("Get/api/v1/borrows");
-        return borrowService.viewAllBorrows();
+    @PostMapping("/filter")
+    public List<BorrowResponse> getBorrows(@RequestBody BorrowFilterRequest filter) throws Exception {
+        log.info("view borrows");
+
+        log.debug(
+                "Borrow filter request: status={}, page={}, size={}",
+                filter.getStatus(),
+                filter.getPage(),
+                filter.getSize()
+        );
+
+        return borrowService.viewBorrowsWithFilter(filter);
     }
 
     @GetMapping("/{id}")
-    public BorrowResponse getBorrowById(@PathVariable int id) throws Exception {
-        log.info("Get/api/v1/borrows/{}",id);
+    public BorrowResponse getId(@PathVariable int id) throws Exception {
+        log.info("view borrows");
+
+        log.debug("Borrow id={}", id);
+
         return borrowService.viewBorrowById(id);
     }
 
     @PostMapping
-    public BorrowResponse createBorrow(@RequestBody BorrowRequest borrow) throws Exception {
-        log.info("Post/api/v1/borrows");
+    public BorrowResponse create(@RequestBody BorrowRequest borrow) throws Exception {
+        log.info("create borrow");
+
         return borrowService.borrowBook(borrow);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBorrow(@PathVariable int id) throws Exception {
-        log.info("Delete/api/v1/borrows/{}",id);
+    public void delete(@PathVariable int id) throws Exception {
+        log.info("delete borrows");
+
+        log.debug("Borrow id={}", id);
+
         borrowService.deleteBorrow(id);
     }
 
     @PatchMapping("/{id}")
-    public void softDeleteBorrow(@PathVariable int id) throws Exception {
-        log.info("Patch/api/v1/borrows/{}",id);
+    public void softDelete(@PathVariable int id) throws Exception {
+        log.info("soft delete borrows");
+
+        log.debug("Borrow id={}", id);
+
         borrowService.softDeleteBorrow(id);
     }
 
     @PatchMapping("/{id}/return")
     public BorrowResponse returnBook(@PathVariable int id) throws Exception {
-        log.info("Patch /api/v1/borrows/{}/return", id);
+        log.info("return book");
+
+        log.debug("Borrow id={}", id);
+
         return borrowService.returnBook(id);
     }
 }

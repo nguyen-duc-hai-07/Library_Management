@@ -1,5 +1,6 @@
 package com.library.dao;
 
+import com.library.dto.request.BookFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.UserResponse;
 import com.library.model.Book;
@@ -14,7 +15,7 @@ public interface BookDao {
 
     BookResponse getBookById(Connection conn, int id) throws SQLException;
 
-    List<BookResponse> getAllBooks(Connection conn) throws SQLException;
+    List<BookResponse> getBooksWithFilter(Connection conn, BookFilterRequest filter) throws SQLException;
 
     void update(Connection conn, Book book) throws SQLException;
 

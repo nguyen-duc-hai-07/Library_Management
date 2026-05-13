@@ -2,6 +2,7 @@ package com.library.service.impl;
 
 import com.library.config.DBConnectionPool;
 import com.library.dao.CategoryDao;
+import com.library.dto.request.CategoryFilterRequest;
 import com.library.dto.request.CategoryRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
@@ -25,7 +26,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     public CategoryResponse createCategory(CategoryRequest request) throws Exception {
         Connection conn = null;
+
         Category category = new Category(request.getName());
+
         log.info("Create category");
 
         try {
@@ -37,7 +40,10 @@ public class CategoryServiceImpl implements CategoryService {
 
             log.info("Category created successfully with id = {}", category.getId());
 
-            return new CategoryResponse(category.getId(), category.getName());
+            return new CategoryResponse(
+                    category.getId(),
+                    category.getName()
+            );
         } catch (Exception e) {
             log.error("Create category failed: {}", e.getMessage(), e);
             if (conn != null) {
@@ -51,27 +57,50 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    public List<CategoryResponse> viewAllCategories() throws Exception {
+    public List<CategoryResponse> viewCategoriesWithFilter(
+            CategoryFilterRequest filter
+    ) throws Exception {
+
         Connection conn = null;
-        log.info("View all categories");
+
+        log.info(
+                "View categories with filter: keyword={}, page={}, size={}",
+                filter.getKeyword(),
+                filter.getPage(),
+                filter.getSize()
+        );
 
         try {
+
             conn = pool.getConnection();
 
-            List<CategoryResponse> category = categoryDao.getAllCategories(conn);
+            List<CategoryResponse> categories =
+                    categoryDao.getCategoriesWithFilter(
+                            conn,
+                            filter
+                    );
 
             conn.commit();
 
-            log.info("All categories found successfully");
+            log.info(
+                    "Categories found successfully, total={}",
+                    categories.size()
+            );
 
-            return category;
+            return categories;
+
         } catch (Exception e) {
-            log.error("View all categories failed: {}", e.getMessage(), e);
+
+            log.error("View categories with filter failed: {}", e.getMessage(), e);
+
             if (conn != null) {
                 conn.rollback();
             }
+
             throw e;
+
         } finally {
+
             if (conn != null) {
                 conn.close();
             }
@@ -85,6 +114,10 @@ public class CategoryServiceImpl implements CategoryService {
             conn = pool.getConnection();
 
             CategoryResponse category = categoryDao.getCategoryById(conn,id);
+            if (category == null) {
+                log.warn("Category not found with id={}", id);
+                throw new Exception("Category not found");
+            }
 
             conn.commit();
 
@@ -124,7 +157,10 @@ public class CategoryServiceImpl implements CategoryService {
 
             log.info("Category updated successfully with id = {}", id);
 
-            return new CategoryResponse(category.getId(), category.getName());
+            return new CategoryResponse(
+                    category.getId(),
+                    category.getName()
+            );
         } catch (Exception e) {
             log.error("Update category by id = {} failed: {}", id, e.getMessage(), e);
             if (conn != null) {
@@ -178,6 +214,7 @@ public class CategoryServiceImpl implements CategoryService {
             CategoryResponse existingCategory = categoryDao.getCategoryById(conn, id);
             if (existingCategory == null) {
                 log.warn("Category not found with id={}", id);
+                throw new Exception("Category not found");
             }
 
             categoryDao.softDelete(conn, id);

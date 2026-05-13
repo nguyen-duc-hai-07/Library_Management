@@ -2,6 +2,7 @@ package com.library.service.impl;
 
 import com.library.config.DBConnectionPool;
 import com.library.dao.AuthorDao;
+import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.request.AuthorRequest;
 import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
@@ -68,27 +69,33 @@ public class AuthorServiceImpl implements AuthorService {
         }
     }
 
-    public List<AuthorResponse> viewAllAuthors() throws Exception {
+    public List<AuthorResponse> viewAuthorsWithFilter(AuthorFilterRequest filter) throws Exception {
 
         Connection conn = null;
 
-        log.info("View all authors");
+        log.info(
+                "View authors with filter: keyword={}, page={}, size={}",
+                filter.getKeyword(),
+                filter.getPage(),
+                filter.getSize()
+        );
+
 
         try {
 
             conn = pool.getConnection();
 
-            List<AuthorResponse> author = authorDao.getAllAuthors(conn);
+            List<AuthorResponse> author = authorDao.getAuthorsWithFilter(conn,filter);
 
             conn.commit();
 
-            log.info("All authors found successfully");
+            log.info("Authors found successfully, total={}", author.size());
 
             return author;
 
         } catch (Exception e) {
 
-            log.error("View all authors failed: {}", e.getMessage(), e);
+            log.error("View authors with filter failed: {}", e.getMessage(), e);
 
             if (conn != null) {
                 conn.rollback();
@@ -115,6 +122,10 @@ public class AuthorServiceImpl implements AuthorService {
             conn = pool.getConnection();
 
             AuthorResponse author = authorDao.getAuthorById(conn, id);
+            if (author == null) {
+                log.warn("Author not found with id={}", id);
+                throw new Exception("Author not found");
+            }
 
             conn.commit();
 
@@ -144,7 +155,11 @@ public class AuthorServiceImpl implements AuthorService {
 
         Connection conn = null;
 
-        Author author = new Author(request.getName(),request.getYear(),request.getDescription());
+        Author author = new Author(
+                request.getName(),
+                request.getYear(),
+                request.getDescription()
+        );
 
         author.setId(id);
 
@@ -252,6 +267,7 @@ public class AuthorServiceImpl implements AuthorService {
             if (existingAuthor == null) {
 
                 log.warn("Author not found with id={}", id);
+                throw new Exception("Author not found");
 
             }
 

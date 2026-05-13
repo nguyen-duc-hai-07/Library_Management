@@ -12,11 +12,8 @@ public class Fine {
     private LocalDateTime paidAt;
     private boolean isDeleted;
 
-    public Fine(int userId, int borrowId,  double fineAmount, int daysLate) {
-        this.userId = userId;
+    public Fine( int borrowId) {
         this.borrowId = borrowId;
-        this.fineAmount = fineAmount;
-        this.daysLate = daysLate;
     }
     public Fine() {
         this.isDeleted = false;
