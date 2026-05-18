@@ -21,11 +21,12 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final DBConnectionPool pool = DBConnectionPool.getInstance();
+
     public UserServiceImpl(UserDao userDao) {
         this.userDao = userDao;
     }
 
-    public List<UserResponse> viewUsersWithFilter(UserFilterRequest filter) throws Exception {
+    public List<UserResponse> filter(UserFilterRequest filter) throws Exception {
         Connection conn = null;
         log.info(
                 "View users with filter: keyword={}, role={}, status={}, page={}, size={}",
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
             conn.commit();
 
-            log.info("Users found successfully, total = {}", userResponses.size() );
+            log.info("Users found successfully, total = {}", userResponses.size());
 
             return userResponses;
         } catch (Exception e) {
@@ -57,6 +58,7 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
+
     public UserResponse createUser(UserRequest request) throws Exception {
         Connection conn = null;
         User user = new User(
@@ -106,7 +108,7 @@ public class UserServiceImpl implements UserService {
         try {
             conn = pool.getConnection();
 
-            UserResponse user = userDao.getUserById(conn , id);
+            UserResponse user = userDao.getUserById(conn, id);
             if (user == null) {
                 log.warn("User not found with id={}", id);
                 throw new Exception("User not found");
@@ -116,7 +118,7 @@ public class UserServiceImpl implements UserService {
 
             log.info("User found successfully with id = {}", id);
 
-           return user;
+            return user;
         } catch (Exception e) {
             log.error("View user by id = {} failed: {}", id, e.getMessage(), e);
             if (conn != null) {
@@ -133,12 +135,12 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(int id, UserRequest request) throws Exception {
         Connection conn = null;
         User user = new User(
-              request.getFullName(),
-              request.getEmail(),
-              request.getPhoneNumber(),
-              request.getPasswordHash(),
-              request.getRole(),
-              request.getStatus()
+                request.getFullName(),
+                request.getEmail(),
+                request.getPhoneNumber(),
+                request.getPasswordHash(),
+                request.getRole(),
+                request.getStatus()
         );
         user.setId(id);
         log.info("Update user by id = {}", id);

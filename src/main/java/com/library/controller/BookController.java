@@ -22,7 +22,7 @@ public class BookController {
     }
 
     @PostMapping("/filter")
-    public List<BookResponse> getAll(@RequestBody BookFilterRequest filter) throws Exception {
+    public List<BookResponse> filter(@RequestBody BookFilterRequest filter) throws Exception {
 
         log.info("View books");
 
@@ -33,7 +33,7 @@ public class BookController {
                 filter.getSize()
         );
 
-        return bookService.viewBooksWithFilter(filter);
+        return bookService.filter(filter);
     }
 
     @GetMapping("/{id}")

@@ -17,12 +17,13 @@ import java.util.List;
 @RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping("/filter")
-    public List<UserResponse> getAll(@RequestBody UserFilterRequest filter) throws Exception {
+    public List<UserResponse> filter(@RequestBody UserFilterRequest filter) throws Exception {
         log.info("View users");
 
         log.debug(
@@ -34,7 +35,7 @@ public class UserController {
                 filter.getSize()
         );
 
-        return userService.viewUsersWithFilter(filter);
+        return userService.filter(filter);
     }
 
     @GetMapping("/{id}")

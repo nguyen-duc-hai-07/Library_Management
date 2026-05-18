@@ -26,4 +26,6 @@ public interface UserDao {
     void softDelete(Connection conn, int id) throws SQLException;
 
     List<FineResponse> getFinesByUserId(Connection conn, int id) throws SQLException;
+
+    User getUserByEmail(Connection conn, String email) throws SQLException;
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 
 public interface UserService {
-    List<UserResponse> viewUsersWithFilter(UserFilterRequest filter) throws Exception;
+    List<UserResponse> filter(UserFilterRequest filter) throws Exception;
 
     UserResponse createUser(UserRequest request) throws Exception;
 

@@ -10,7 +10,7 @@ import java.util.List;
 public interface AuthorService {
     AuthorResponse createAuthor(AuthorRequest request) throws Exception;
 
-    List<AuthorResponse> viewAuthorsWithFilter(AuthorFilterRequest filter) throws Exception;
+    List<AuthorResponse> filter(AuthorFilterRequest filter) throws Exception;
 
     AuthorResponse viewAuthorById(int id) throws Exception;
 

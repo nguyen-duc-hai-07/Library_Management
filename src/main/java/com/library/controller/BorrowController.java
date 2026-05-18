@@ -15,12 +15,13 @@ import java.util.List;
 @RequestMapping("/api/v1/borrows")
 public class BorrowController {
     private final BorrowService borrowService;
+
     public BorrowController(BorrowService borrowService) {
         this.borrowService = borrowService;
     }
 
     @PostMapping("/filter")
-    public List<BorrowResponse> getBorrows(@RequestBody BorrowFilterRequest filter) throws Exception {
+    public List<BorrowResponse> filter(@RequestBody BorrowFilterRequest filter) throws Exception {
         log.info("view borrows");
 
         log.debug(
@@ -30,7 +31,7 @@ public class BorrowController {
                 filter.getSize()
         );
 
-        return borrowService.viewBorrowsWithFilter(filter);
+        return borrowService.filter(filter);
     }
 
     @GetMapping("/{id}")

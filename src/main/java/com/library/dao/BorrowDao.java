@@ -20,4 +20,5 @@ public interface BorrowDao {
     void softDelete(Connection conn, int id) throws SQLException;
 
     void returnBook(Connection conn, int id) throws SQLException;
+
 }

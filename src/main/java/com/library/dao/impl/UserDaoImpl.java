@@ -17,7 +17,7 @@ import java.util.List;
 
 @Repository
 public class UserDaoImpl implements UserDao {
-    public List<UserResponse> getUsersWihFilter(Connection conn , UserFilterRequest filter) throws Exception {
+    public List<UserResponse> getUsersWihFilter(Connection conn, UserFilterRequest filter) throws Exception {
         String sql = """
                 SELECT id,full_name,email,phone_number,role,status,created_at
                 FROM users
@@ -32,17 +32,17 @@ public class UserDaoImpl implements UserDao {
                 LIMIT ?
                 OFFSET ?
                 """;
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1,"%" + filter.getKeyword() + "%");
-            ps.setString(2,"%" + filter.getKeyword() + "%");
-            ps.setString(3,filter.getRole().name());
-            ps.setString(4,filter.getStatus().name());
-            ps.setInt(5,filter.getSize());
-            ps.setInt(6,(filter.getPage() -1) * filter.getSize());
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + filter.getKeyword() + "%");
+            ps.setString(2, "%" + filter.getKeyword() + "%");
+            ps.setString(3, filter.getRole().name());
+            ps.setString(4, filter.getStatus().name());
+            ps.setInt(5, filter.getSize());
+            ps.setInt(6, (filter.getPage() - 1) * filter.getSize());
 
             List<UserResponse> userResponse = new ArrayList<>();
             ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 UserResponse user = new UserResponse();
                 user.setId(rs.getInt("id"));
                 user.setFullName(rs.getString("full_name"));
@@ -59,6 +59,7 @@ public class UserDaoImpl implements UserDao {
             return userResponse;
         }
     }
+
     public void insert(Connection conn, User user) throws SQLException {
         String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, role, status) VALUES (?, ?, ?, ?, ?::user_role, ?::user_status)";
 
@@ -128,30 +129,31 @@ public class UserDaoImpl implements UserDao {
             return null;
         }
     }
+
     public List<BookResponse> getBooksByUserId(Connection conn, int id)
             throws SQLException {
 
         String sql = """
-            SELECT 
-                b.id,
-                b.title,
-                b.isbn,
-                b.category_id,
-                b.author_id,
-                c.name AS category_name,
-                a.name AS author_name
-            FROM books b
-            JOIN categories c ON b.category_id = c.id
-            JOIN authors a ON b.author_id = a.id
-            JOIN borrows br ON b.id = br.book_id
-            WHERE br.user_id = ?
-                AND br.is_returned = FALSE
-                AND b.is_deleted = FALSE
-                AND br.is_deleted = FALSE
-                AND a.is_deleted = FALSE
-                AND c.is_deleted = FALSE
-                AND br.status = 'BORROWING'::borrow_status
-            """;
+                SELECT 
+                    b.id,
+                    b.title,
+                    b.isbn,
+                    b.category_id,
+                    b.author_id,
+                    c.name AS category_name,
+                    a.name AS author_name
+                FROM books b
+                JOIN categories c ON b.category_id = c.id
+                JOIN authors a ON b.author_id = a.id
+                JOIN borrows br ON b.id = br.book_id
+                WHERE br.user_id = ?
+                    AND br.is_returned = FALSE
+                    AND b.is_deleted = FALSE
+                    AND br.is_deleted = FALSE
+                    AND a.is_deleted = FALSE
+                    AND c.is_deleted = FALSE
+                    AND br.status = 'BORROWING'::borrow_status
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -180,15 +182,14 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
-    public void softDelete(Connection conn, int id)
-            throws SQLException {
+    public void softDelete(Connection conn, int id) throws SQLException {
 
         String sql = """
-            UPDATE users
-            SET is_deleted = TRUE
-            WHERE id = ?
-            AND is_deleted = FALSE
-            """;
+                UPDATE users
+                SET is_deleted = TRUE
+                WHERE id = ?
+                AND is_deleted = FALSE
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -202,18 +203,18 @@ public class UserDaoImpl implements UserDao {
             throws SQLException {
 
         String sql = """
-            SELECT
-                f.id,
-                f.user_id,
-                f.borrow_id,
-                f.days_late,
-                f.status,
-                f.paid_at,
-                f.fine_amount
-            FROM fines f
-            WHERE f.user_id = ?
-                AND f.is_deleted = FALSE
-            """;
+                SELECT
+                    f.id,
+                    f.user_id,
+                    f.borrow_id,
+                    f.days_late,
+                    f.status,
+                    f.paid_at,
+                    f.fine_amount
+                FROM fines f
+                WHERE f.user_id = ?
+                    AND f.is_deleted = FALSE
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -247,6 +248,25 @@ public class UserDaoImpl implements UserDao {
             }
 
             return fineResponses;
+        }
+    }
+
+    public User getUserByEmail(Connection conn, String email) throws SQLException {
+        String sql = """
+                SELECT id, email, password_hash
+                FROM users WHERE email = ? AND is_deleted = FALSE
+                """;
+        try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if(rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setEmail(rs.getString("email"));
+                user.setPasswordHash(rs.getString("password_hash"));
+                return user;
+            }
+            return null;
         }
     }
 }

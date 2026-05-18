@@ -8,11 +8,11 @@ import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
 import com.library.model.Category;
 import com.library.service.CategoryService;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -57,9 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    public List<CategoryResponse> viewCategoriesWithFilter(
-            CategoryFilterRequest filter
-    ) throws Exception {
+    public List<CategoryResponse> filter(CategoryFilterRequest filter) throws Exception {
 
         Connection conn = null;
 
@@ -106,6 +104,7 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
     }
+
     public CategoryResponse viewCategoryById(int id) throws Exception {
         Connection conn = null;
         log.info("View category with id = {}", id);
@@ -113,7 +112,7 @@ public class CategoryServiceImpl implements CategoryService {
         try {
             conn = pool.getConnection();
 
-            CategoryResponse category = categoryDao.getCategoryById(conn,id);
+            CategoryResponse category = categoryDao.getCategoryById(conn, id);
             if (category == null) {
                 log.warn("Category not found with id={}", id);
                 throw new Exception("Category not found");
@@ -204,6 +203,7 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
     }
+
     public void softDeleteCategory(int id) throws Exception {
         Connection conn = null;
         log.info("Soft delete category with id = {}", id);
@@ -234,6 +234,7 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
     }
+
     public List<BookResponse> viewAllBooksByCategory(int categoryId) throws Exception {
         Connection conn = null;
         log.info("View all books by category id = {}", categoryId);

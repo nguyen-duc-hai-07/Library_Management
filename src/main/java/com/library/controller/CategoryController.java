@@ -1,10 +1,9 @@
 package com.library.controller;
 
 import com.library.dto.request.CategoryFilterRequest;
+import com.library.dto.request.CategoryRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
-import com.library.dto.request.CategoryRequest;
-
 import com.library.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +15,13 @@ import java.util.List;
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
     private final CategoryService categoryService;
+
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
     @PostMapping("/filter")
-    public List<CategoryResponse> getAllCategories(@RequestBody CategoryFilterRequest filter) throws Exception {
+    public List<CategoryResponse> filter(@RequestBody CategoryFilterRequest filter) throws Exception {
         log.info("view Categories");
 
         log.debug(
@@ -31,7 +31,7 @@ public class CategoryController {
                 filter.getSize()
         );
 
-        return categoryService.viewCategoriesWithFilter(filter);
+        return categoryService.filter(filter);
     }
 
     @GetMapping("/{id}")

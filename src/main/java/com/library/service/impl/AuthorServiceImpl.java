@@ -69,7 +69,7 @@ public class AuthorServiceImpl implements AuthorService {
         }
     }
 
-    public List<AuthorResponse> viewAuthorsWithFilter(AuthorFilterRequest filter) throws Exception {
+    public List<AuthorResponse> filter(AuthorFilterRequest filter) throws Exception {
 
         Connection conn = null;
 

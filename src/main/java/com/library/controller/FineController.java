@@ -8,17 +8,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/fines")
 public class FineController {
     private final FineService fineService;
+
     public FineController(FineService fineService) {
         this.fineService = fineService;
     }
 
     @PostMapping("/filter")
-    public List<FineResponse> getAll(@RequestBody FineFilterRequest filter) throws Exception {
+    public List<FineResponse> filter(@RequestBody FineFilterRequest filter) throws Exception {
         log.info("view fines");
 
         log.debug(
@@ -28,7 +30,7 @@ public class FineController {
                 filter.getSize()
         );
 
-        return fineService.viewFinesWithFilter(filter);
+        return fineService.filter(filter);
     }
 
     @GetMapping("/{id}")
@@ -48,7 +50,6 @@ public class FineController {
 
     }
 
-
     @PatchMapping("/{id}")
     public void softDelete(@PathVariable int id) throws Exception {
         log.info("soft delete fine");
@@ -61,7 +62,6 @@ public class FineController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable int id) throws Exception {
         log.info("delete fine");
-
         log.debug("Delete id={}", id);
 
         fineService.deleteFine(id);

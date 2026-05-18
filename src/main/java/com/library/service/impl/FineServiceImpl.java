@@ -3,12 +3,12 @@ package com.library.service.impl;
 import com.library.config.DBConnectionPool;
 import com.library.dao.BorrowDao;
 import com.library.dao.FineDao;
-import com.library.dao.UserDao;
 import com.library.dto.request.FineFilterRequest;
 import com.library.dto.request.FineRequest;
 import com.library.dto.response.BorrowResponse;
 import com.library.dto.response.FineResponse;
 import com.library.model.Fine;
+import com.library.model.FineStatus;
 import com.library.service.FineService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,6 @@ import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 
 @Slf4j
 @Service
@@ -25,7 +24,8 @@ public class FineServiceImpl implements FineService {
     private final DBConnectionPool pool = DBConnectionPool.getInstance();
     private final FineDao fineDao;
     private final BorrowDao borrowDao;
-    public FineServiceImpl(FineDao fineDao,  BorrowDao borrowDao) {
+
+    public FineServiceImpl(FineDao fineDao, BorrowDao borrowDao) {
         this.fineDao = fineDao;
         this.borrowDao = borrowDao;
     }
@@ -34,7 +34,7 @@ public class FineServiceImpl implements FineService {
         Connection conn = null;
         Fine fine = new Fine();
         fine.setBorrowId(fineRequest.getBorrowId());
-        log.info("Late return detected for borrowId={}, fine created",  fineRequest.getBorrowId());
+        log.info("Late return detected for borrowId={}, fine created", fineRequest.getBorrowId());
         try {
             conn = pool.getConnection();
 
@@ -88,16 +88,33 @@ public class FineServiceImpl implements FineService {
                 throw new Exception("Fine not found");
             }
 
+            if (fine.getStatus() == FineStatus.PAID) {
+                log.info("Fine with id = {} is already PAID. Returning as is.", id);
+                return fine;
+            }
+
             BorrowResponse borrow = borrowDao.getBorrowById(conn, fine.getBorrowId());
 
             int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
 
+            if (daysLate <= 0) {
+                log.warn("Borrow is not late");
+                throw new Exception("Borrow is not late");
+            }
+
             double fineAmount = daysLate * 10000;
 
-            fine.setDaysLate(daysLate);
-            fine.setFineAmount(fineAmount);
+            if (daysLate != fine.getDaysLate()) {
+                fine.setDaysLate(daysLate);
 
-            conn.commit();
+                fine.setFineAmount(fineAmount);
+
+                fineDao.updateDaysLate(conn, fine);
+
+                conn.commit();
+
+                log.info("Fine updated and found successfully with id = {}", id);
+            }
 
             log.info("Fine found successfully with id = {}", id);
 
@@ -207,7 +224,7 @@ public class FineServiceImpl implements FineService {
         }
     }
 
-    public List<FineResponse> viewFinesWithFilter(FineFilterRequest filter) throws Exception {
+    public List<FineResponse> filter(FineFilterRequest filter) throws Exception {
         Connection conn = null;
         log.info(
                 "View fines with filter: status={}, page = {}, size = {}",
@@ -220,17 +237,30 @@ public class FineServiceImpl implements FineService {
 
             List<FineResponse> fines = fineDao.getFinesWithFilter(conn, filter);
 
-            for(FineResponse fine : fines) {
+            for (FineResponse fine : fines) {
+
+                if (fine.getStatus() == FineStatus.PAID) {
+                    continue;
+                }
+
                 BorrowResponse borrow = borrowDao.getBorrowById(conn, fine.getBorrowId());
 
                 int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
 
+                if (daysLate <= 0) {
+                    log.warn("Borrow is not late");
+                    throw new Exception("Borrow is not late");
+                }
+
                 double fineAmount = daysLate * 10000;
 
-                fine.setDaysLate(daysLate);
+                if (daysLate != fine.getDaysLate()) {
+                    fine.setDaysLate(daysLate);
 
-                fine.setFineAmount(fineAmount);
+                    fine.setFineAmount(fineAmount);
 
+                    fineDao.updateDaysLate(conn, fine);
+                }
             }
 
             conn.commit();

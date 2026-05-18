@@ -13,7 +13,7 @@ import java.util.List;
 public interface CategoryService {
     CategoryResponse createCategory(CategoryRequest request) throws Exception;
 
-    List<CategoryResponse> viewCategoriesWithFilter(CategoryFilterRequest filter) throws Exception;
+    List<CategoryResponse> filter(CategoryFilterRequest filter) throws Exception;
 
     CategoryResponse viewCategoryById(int id) throws Exception;
 

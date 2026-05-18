@@ -4,9 +4,7 @@ import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.request.AuthorRequest;
 import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
-import com.library.dto.response.FineResponse;
 import com.library.service.AuthorService;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +15,13 @@ import java.util.List;
 @RequestMapping("/api/v1/authors")
 public class AuthorController {
     private final AuthorService authorService;
+
     public AuthorController(AuthorService authorService) {
         this.authorService = authorService;
     }
 
     @PostMapping("/filter")
-    public List<AuthorResponse> getAll(@RequestBody AuthorFilterRequest filter) throws Exception {
+    public List<AuthorResponse> filter(@RequestBody AuthorFilterRequest filter) throws Exception {
         log.info("View authors");
 
         log.debug(
@@ -32,7 +31,7 @@ public class AuthorController {
                 filter.getSize()
         );
 
-        return authorService.viewAuthorsWithFilter(filter);
+        return authorService.filter(filter);
     }
 
     @GetMapping("/{id}")

@@ -113,7 +113,7 @@ public class BookServiceImpl implements BookService {
         }
     }
 
-    public List<BookResponse> viewBooksWithFilter(BookFilterRequest filter) throws Exception {
+    public List<BookResponse> filter(BookFilterRequest filter) throws Exception {
         Connection conn = null;
         log.info(
                 "View books with filter: keyword={}, page={}, size={}",

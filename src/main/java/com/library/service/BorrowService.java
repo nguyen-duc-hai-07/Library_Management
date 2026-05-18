@@ -10,7 +10,7 @@ import java.util.List;
 public interface BorrowService {
     BorrowResponse borrowBook(BorrowRequest borrowRequest) throws Exception;
 
-    List<BorrowResponse> viewBorrowsWithFilter(BorrowFilterRequest filter) throws Exception;
+    List<BorrowResponse> filter(BorrowFilterRequest filter) throws Exception;
 
     BorrowResponse viewBorrowById(int id) throws Exception;
 

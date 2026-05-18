@@ -80,7 +80,7 @@ public class BorrowServiceImpl implements BorrowService {
         }
     }
 
-    public List<BorrowResponse> viewBorrowsWithFilter(BorrowFilterRequest filter) throws Exception {
+    public List<BorrowResponse> filter(BorrowFilterRequest filter) throws Exception {
         Connection conn = null;
         log.info(
                 "View borrows with filter: status={}, page={}, size={}",

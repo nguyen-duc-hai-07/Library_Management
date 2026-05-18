@@ -15,9 +15,9 @@ import java.util.List;
 
 @Repository
 public class BookDaoImpl implements BookDao {
-    public void insert(Connection conn , Book book) throws SQLException {
+    public void insert(Connection conn, Book book) throws SQLException {
         String sql = "INSERT INTO books (title, description, isbn, name, publisher, publish_year, category_id, author_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try(PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, book.getTitle());
             ps.setString(2, book.getDescription());
             ps.setString(3, book.getIsbn());
@@ -29,18 +29,18 @@ public class BookDaoImpl implements BookDao {
             ps.executeUpdate();
 
             ResultSet rs = ps.getGeneratedKeys();
-            if(rs.next()) {
+            if (rs.next()) {
                 book.setId(rs.getInt(1));
             }
         }
     }
 
-    public BookResponse getBookById(Connection conn , int id) throws SQLException {
+    public BookResponse getBookById(Connection conn, int id) throws SQLException {
         String sql = "SELECT id, isbn,name, title, author_id, category_id, publisher, publish_year, description, total_quantity, available_quantity FROM books WHERE is_deleted = FALSE AND id = ?";
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,id);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 BookResponse book = new BookResponse();
                 book.setId(rs.getInt("id"));
                 book.setIsbn(rs.getString("isbn"));
@@ -73,13 +73,13 @@ public class BookDaoImpl implements BookDao {
                 OFFSET ?
                 """;
 
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + filter.getKeyword() + "%");
             ps.setInt(2, filter.getSize());
-            ps.setInt(3, (filter.getPage() -1) * filter.getSize());
+            ps.setInt(3, (filter.getPage() - 1) * filter.getSize());
             ResultSet rs = ps.executeQuery();
             List<BookResponse> bookResponse = new java.util.ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 BookResponse books = new BookResponse();
                 books.setId(rs.getInt("id"));
                 books.setName(rs.getString("name"));
@@ -100,9 +100,9 @@ public class BookDaoImpl implements BookDao {
         }
     }
 
-    public void update(Connection conn , Book book) throws SQLException {
+    public void update(Connection conn, Book book) throws SQLException {
         String sql = "UPDATE books SET title = ?, description = ?, isbn = ?, name = ?, publisher = ?, publish_year = ?, category_id = ?, author_id = ? WHERE id = ? AND is_deleted = FALSE";
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, book.getTitle());
             ps.setString(2, book.getDescription());
             ps.setString(3, book.getIsbn());
@@ -116,18 +116,18 @@ public class BookDaoImpl implements BookDao {
         }
     }
 
-    public void delete(Connection conn , int id) throws SQLException {
+    public void delete(Connection conn, int id) throws SQLException {
         String sql = "DELETE FROM books WHERE id = ? AND is_deleted = FALSE";
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,id);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
 
     public void softDelete(Connection conn, int id) throws SQLException {
         String sql = "UPDATE books SET is_deleted = TRUE WHERE id = ? AND is_deleted = FALSE";
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,id);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
             ps.executeUpdate();
         }
     }
@@ -146,18 +146,18 @@ public class BookDaoImpl implements BookDao {
         }
     }
 
-    public List<UserResponse> getUsersByBookId(Connection conn , int id) throws SQLException {
+    public List<UserResponse> getUsersByBookId(Connection conn, int id) throws SQLException {
         String sql = """
                 SELECT u.id,u.full_name,u.email,u.phone_number
                 FROM users u
                 JOIN borrows b ON u.id = b.user_id
                 WHERE b.book_id = ? AND b.is_deleted = FALSE
                 """;
-        try(PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1,id);
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             List<UserResponse> userResponse = new java.util.ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 UserResponse user = new UserResponse();
                 user.setId(rs.getInt("id"));
                 user.setFullName(rs.getString("full_name"));
@@ -168,6 +168,7 @@ public class BookDaoImpl implements BookDao {
             return userResponse;
         }
     }
+
     public void updateBorrowedQuantity(Connection conn, int id, int quantity) throws SQLException {
         String sql = "UPDATE books SET " +
                 "available_quantity = available_quantity + ? " +

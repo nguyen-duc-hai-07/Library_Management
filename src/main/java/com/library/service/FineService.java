@@ -17,5 +17,5 @@ public interface FineService {
 
     void softDeleteFine(int id) throws Exception;
 
-    List<FineResponse> viewFinesWithFilter(FineFilterRequest filter) throws Exception;
+    List<FineResponse> filter(FineFilterRequest filter) throws Exception;
 }

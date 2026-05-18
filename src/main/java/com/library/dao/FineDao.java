@@ -20,4 +20,6 @@ public interface FineDao {
     void softDelete(Connection conn, int id) throws SQLException;
 
     void payFine(Connection conn, int id) throws SQLException;
+
+    void updateDaysLate(Connection conn, FineResponse fine) throws SQLException;
 }

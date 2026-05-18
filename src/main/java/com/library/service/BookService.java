@@ -10,7 +10,7 @@ import java.util.List;
 public interface BookService {
     BookResponse createBook(BookRequest bookRequest) throws Exception;
 
-    List<BookResponse> viewBooksWithFilter(BookFilterRequest filter) throws Exception;
+    List<BookResponse> filter(BookFilterRequest filter) throws Exception;
 
     BookResponse viewBookById(int id) throws Exception;
 
