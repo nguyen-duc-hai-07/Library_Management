@@ -24,6 +24,16 @@ public class User {
     public void setId(int id) {
         this.id = id;
     }
+    public User(String fullName, String email, String phoneNumber, String passwordHash, UserRole role, UserStatus status) {
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.status = status;
+        this.createdAt = LocalDateTime.now();
+        this.isDeleted = false;
+    }
     public String getFullName() {
         return fullName;
     }

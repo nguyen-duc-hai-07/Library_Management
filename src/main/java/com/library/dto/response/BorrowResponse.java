@@ -1,9 +1,12 @@
 package com.library.dto.response;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.library.model.BorrowStatus;
 
 import java.time.LocalDateTime;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BorrowResponse {
     private int id;
     private int bookId;

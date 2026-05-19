@@ -8,6 +8,10 @@ public class Category {
     public Category() {
         this.isDeleted = false;
     }
+    public Category(String name) {
+        this.name = name;
+        this.isDeleted = false;
+    }
     public int getId() {
         return id;
     }

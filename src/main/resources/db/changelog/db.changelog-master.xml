@@ -12,5 +12,7 @@
     <include file="db/changelog/005-books.xml"/>
     <include file="db/changelog/006-borrows.xml"/>
     <include file="db/changelog/007-fines.xml"/>
-
+    <include file="db/changelog/008-alter-borrows-default-status.xml"/>
+    <include file="db/changelog/009-alter-fines-default-status.xml"/>
+    <include file="db/changelog/010_add_name_to_books.xml"/>
 </databaseChangeLog>

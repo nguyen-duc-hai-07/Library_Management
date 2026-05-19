@@ -9,9 +9,12 @@ public class Fine {
     private FineStatus status;
     private double fineAmount;
     private int daysLate;
-    private LocalDateTime createdAt;
+    private LocalDateTime paidAt;
     private boolean isDeleted;
 
+    public Fine( int borrowId) {
+        this.borrowId = borrowId;
+    }
     public Fine() {
         this.isDeleted = false;
     }
@@ -51,16 +54,16 @@ public class Fine {
     public void setDaysLate(int daysLate) {
         this.daysLate = daysLate;
     }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
     public boolean isDeleted() {
         return isDeleted;
     }
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+    public LocalDateTime getPaidAt() {
+        return paidAt;
+    }
+    public void setPaidAt(LocalDateTime paidAt) {
+        this.paidAt = paidAt;
     }
 }

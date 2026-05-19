@@ -1,14 +1,18 @@
 package com.library.dto.request;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.library.model.UserRole;
 import com.library.model.UserStatus;
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserRequest {
     private String fullName;
     private String email;
     private String phoneNumber;
     private String passwordHash;
     private UserRole role;
+    private UserStatus status;
 
     public UserRequest() {
     }
@@ -42,5 +46,11 @@ public class UserRequest {
     }
     public void setRole(UserRole role) {
         this.role = role;
+    }
+    public UserStatus getStatus() {
+        return status;
+    }
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 }

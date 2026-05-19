@@ -1,12 +1,16 @@
 package com.library.dto.request;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class BookRequest {
     private String title;
     private String description;
     private String isbn;
     private String name;
     private String publisher;
-    private int publishYear;
+    private String publishYear;
     private int totalQuantity;
     private int availableQuantity;
     private int authorId;
@@ -44,12 +48,6 @@ public class BookRequest {
     public void setPublisher(String publisher) {
         this.publisher = publisher;
     }
-    public int getPublishYear() {
-        return publishYear;
-    }
-    public void setPublishYear(int publishYear) {
-        this.publishYear = publishYear;
-    }
     public int getTotalQuantity() {
         return totalQuantity;
     }
@@ -73,5 +71,11 @@ public class BookRequest {
     }
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
+    }
+    public String getPublishYear() {
+        return publishYear;
+    }
+    public void setPublishYear(String publishYear) {
+        this.publishYear = publishYear;
     }
 }
