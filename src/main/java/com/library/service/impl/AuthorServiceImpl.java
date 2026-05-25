@@ -5,7 +5,6 @@ import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.request.AuthorRequest;
 import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
-import com.library.mapper.AuthorMapper;
 import com.library.model.Author;
 import com.library.repository.AuthorRepository;
 import com.library.service.AuthorService;
@@ -23,22 +22,30 @@ import java.util.List;
 public class AuthorServiceImpl implements AuthorService {
 
     private final AuthorRepository authorRepository;
-    private final AuthorMapper authorMapper;
 
-    public AuthorServiceImpl(AuthorRepository authorRepository, AuthorMapper authorMapper) {
-        this.authorMapper = authorMapper;
+    public AuthorServiceImpl(AuthorRepository authorRepository) {
         this.authorRepository = authorRepository;
     }
 
     public AuthorResponse createAuthor(AuthorRequest request) {
         log.info("Create author");
 
-        Author author = authorMapper.toEntity(request);
+        Author author = Author.builder()
+                .name(request.getName())
+                .year(request.getYear())
+                .description(request.getDescription())
+                .build();
+
         Author savedAuthor = authorRepository.save(author);
 
         log.info("Author created successfully with id={}", savedAuthor.getId());
 
-        return authorMapper.toResponse(savedAuthor);
+        return AuthorResponse.builder()
+                .id(savedAuthor.getId())
+                .name(savedAuthor.getName())
+                .year(savedAuthor.getYear())
+                .description(savedAuthor.getDescription())
+                .build();
     }
 
     public List<AuthorResponse> filter(AuthorFilterRequest filter) {
@@ -80,7 +87,12 @@ public class AuthorServiceImpl implements AuthorService {
 
         log.info("Author updated successfully with id = {}", id);
 
-        return authorMapper.toResponse(saved);
+        return AuthorResponse.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .year(saved.getYear())
+                .description(saved.getDescription())
+                .build();
     }
 
     public void softDeleteAuthor(int id) {
