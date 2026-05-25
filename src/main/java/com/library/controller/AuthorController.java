@@ -59,15 +59,6 @@ public class AuthorController {
         return authorService.updateAuthor(id, author);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-        log.info("Delete author");
-
-        log.debug("Delete id={}", id);
-
-        authorService.deleteAuthor(id);
-    }
-
     @PatchMapping("/{id}")
     public void softDelete(@PathVariable int id) throws Exception {
         log.info("Soft delete author");

@@ -1,91 +1,47 @@
 package com.library.model;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "users")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "full_name", nullable = false)
     private String fullName;
+
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
+
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
+
+    @Column(columnDefinition = "user_role")
+    @Enumerated(EnumType.STRING)
     private UserRole role;
+
+    @Column(columnDefinition = "user_status")
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
-    private LocalDateTime createdAt;
-    private boolean isDeleted;
 
-    public User() {
-        this.createdAt = LocalDateTime.now();
-        this.isDeleted = false;
-    }
+    @Builder.Default
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public User(String fullName, String email, String phoneNumber, String passwordHash, UserRole role, UserStatus status) {
-        this.fullName = fullName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.passwordHash = passwordHash;
-        this.role = role;
-        this.status = status;
-        this.createdAt = LocalDateTime.now();
-        this.isDeleted = false;
-    }
-    public String getFullName() {
-        return fullName;
-    }
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-    public UserRole getRole() {
-        return role;
-    }
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
-    public UserStatus getStatus() {
-        return status;
-    }
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-    public void setPassword(String password) {
-        this.passwordHash = password;
-    }
-    public String getPassword() {
-        return passwordHash;
-    }
+    @Builder.Default
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
+
 }

@@ -3,9 +3,16 @@ package com.library.dto.response;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.library.model.FineStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class FineResponse {
     private int id;
@@ -16,8 +23,6 @@ public class FineResponse {
     private int daysLate;
     private LocalDateTime paidAt;
 
-    public FineResponse() {
-    }
     public int getId() {
         return id;
     }

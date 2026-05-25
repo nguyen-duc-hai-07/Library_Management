@@ -8,17 +8,15 @@ import com.library.dto.response.BookResponse;
 import java.util.List;
 
 public interface AuthorService {
-    AuthorResponse createAuthor(AuthorRequest request) throws Exception;
+    AuthorResponse createAuthor(AuthorRequest request);
 
-    List<AuthorResponse> filter(AuthorFilterRequest filter) throws Exception;
+    List<AuthorResponse> filter(AuthorFilterRequest filter);
 
-    AuthorResponse viewAuthorById(int id) throws Exception;
+    AuthorResponse viewAuthorById(int id);
 
-    AuthorResponse updateAuthor(int id, AuthorRequest request) throws Exception;
+    AuthorResponse updateAuthor(int id, AuthorRequest request);
 
-    void deleteAuthor(int id) throws Exception;
+    void softDeleteAuthor(int id);
 
-    void softDeleteAuthor(int id) throws Exception;
-
-    List<BookResponse> viewAllBooksByAuthor(int authorId) throws Exception;
+    List<BookResponse> viewAllBooksByAuthor(int authorId);
 }
