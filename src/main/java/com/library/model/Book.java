@@ -1,12 +1,15 @@
 package com.library.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true) // toBuilder() giúp không tạo thêm object
 @Entity
 @Table(name = "books")
 public class Book {
@@ -52,4 +55,18 @@ public class Book {
     @Builder.Default
     private int availableQuantity = 1;
 
+    public Book(int id, String title, String description,
+                String isbn, String name, String publisher,
+                String publishYear, Author author, Category category
+    ) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.isbn = isbn;
+        this.name = name;
+        this.publisher = publisher;
+        this.publishYear = publishYear;
+        this.author = author;
+        this.category = category;
+    }
 }

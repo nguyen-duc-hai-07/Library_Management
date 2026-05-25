@@ -41,4 +41,24 @@ public class BookResponse {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
     }
+
+    public BookResponse(int id, String title, String description, String isbn,
+                        String name, String publisher, String publishYear,
+                        int totalQuantity, int availableQuantity,
+                        String authorName, String categoryName,
+                        int authorId, int categoryId) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.isbn = isbn;
+        this.name = name;
+        this.publisher = publisher;
+        this.publishYear = publishYear;
+        this.totalQuantity = totalQuantity;
+        this.availableQuantity = availableQuantity;
+        this.authorName = authorName;
+        this.categoryName = categoryName;
+        this.authorId = authorId;
+        this.categoryId = categoryId;
+    }
 }
