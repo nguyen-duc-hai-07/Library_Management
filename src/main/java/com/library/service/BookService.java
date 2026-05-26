@@ -16,8 +16,6 @@ public interface BookService {
 
     BookResponse updateBook(int id, BookRequest bookRequest) throws Exception;
 
-    void deleteBook(int id) throws Exception;
-
     void softDeleteBook(int id) throws Exception;
 
     List<UserResponse> viewAllUsersByBook(int bookId) throws Exception;

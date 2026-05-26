@@ -1,33 +1,27 @@
 package com.library.model;
 
-public class Category {
-    private int id;
-    private String name;
-    private boolean isDeleted;
+import jakarta.persistence.*;
+import lombok.*;
 
-    public Category() {
-        this.isDeleted = false;
-    }
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "categories")
+public class Category {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
+
     public Category(String name) {
         this.name = name;
-        this.isDeleted = false;
-    }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
     }
 }

@@ -1,74 +1,50 @@
 package com.library.model;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "borrows")
 public class Borrow {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int bookId;
-    private int userId;
-    private LocalDateTime borrowDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id", nullable = false)
+    private Book book;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(name = "borrow_date")
+    @Builder.Default
+    private LocalDateTime borrowDate = LocalDateTime.now();
+
+    @Column(name = "return_date")
     private LocalDateTime returnDate;
+
+    @Column(name = "due_date")
     private LocalDateTime dueDate;
-    private boolean isDeleted;
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
+
+    @Column(columnDefinition = "borrow_status")
+    @Enumerated(EnumType.STRING)
     private BorrowStatus status;
 
-    public Borrow() {
-        this.borrowDate = LocalDateTime.now();
-        this.isDeleted = false;
-    }
-    public Borrow(int bookId, int userId, LocalDateTime dueDate) {
-        this.bookId = bookId;
-        this.userId = userId;
-        this.dueDate = dueDate;
-        this.borrowDate = LocalDateTime.now();
-        this.isDeleted = false;
-    }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public int getBookId() {
-        return bookId;
-    }
-    public void setBookId(int bookId) {
-        this.bookId = bookId;
-    }
-    public int getUserId() {
-        return userId;
-    }
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-    public LocalDateTime getBorrowDate() {
-        return borrowDate;
-    }
-    public void setBorrowDate(LocalDateTime borrowDate) {
-        this.borrowDate = borrowDate;
-    }
-    public LocalDateTime getReturnDate() {
-        return returnDate;
-    }
-    public void setReturnDate(LocalDateTime returnDate) {
-        this.returnDate = returnDate;
-    }
-    public LocalDateTime getDueDate() {
-        return dueDate;
-    }
-    public void setDueDate(LocalDateTime dueDate) {
-        this.dueDate = dueDate;
-    }
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-    public BorrowStatus getStatus() {
-        return status;
-    }
-    public void setStatus(BorrowStatus status) {
-        this.status = status;
-    }
 }

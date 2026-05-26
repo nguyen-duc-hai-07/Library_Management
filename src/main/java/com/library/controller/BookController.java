@@ -64,16 +64,6 @@ public class BookController {
         return bookService.updateBook(id, book);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-
-        log.info("Delete book");
-
-        log.debug("Delete id={}", id);
-
-        bookService.deleteBook(id);
-    }
-
     @PatchMapping("/{id}")
     public void softDelete(@PathVariable int id) throws Exception {
 

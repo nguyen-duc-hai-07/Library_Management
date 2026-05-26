@@ -1,69 +1,45 @@
 package com.library.model;
 
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "fines")
 public class Fine {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int userId;
-    private int borrowId;
-    private FineStatus status;
-    private double fineAmount;
-    private int daysLate;
-    private LocalDateTime paidAt;
-    private boolean isDeleted;
 
-    public Fine( int borrowId) {
-        this.borrowId = borrowId;
-    }
-    public Fine() {
-        this.isDeleted = false;
-    }
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
-        this.id = id;
-    }
-    public int getUserId() {
-        return userId;
-    }
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-    public int getBorrowId() {
-        return borrowId;
-    }
-    public void setBorrowId(int borrowId) {
-        this.borrowId = borrowId;
-    }
-    public FineStatus getStatus() {
-        return status;
-    }
-    public void setStatus(FineStatus status) {
-        this.status = status;
-    }
-    public double getFineAmount() {
-        return fineAmount;
-    }
-    public void setFineAmount(double fineAmount) {
-        this.fineAmount = fineAmount;
-    }
-    public int getDaysLate() {
-        return daysLate;
-    }
-    public void setDaysLate(int daysLate) {
-        this.daysLate = daysLate;
-    }
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-    public LocalDateTime getPaidAt() {
-        return paidAt;
-    }
-    public void setPaidAt(LocalDateTime paidAt) {
-        this.paidAt = paidAt;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "borrow_id", nullable = false)
+    private Borrow borrow;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "fine_status")
+    private FineStatus status;
+
+    @Column(name = "fine_amount", nullable = false)
+    private BigDecimal fineAmount;
+
+    @Column(name = "days_late", nullable = false)
+    private int daysLate;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private boolean isDeleted = false;
+
 }

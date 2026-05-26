@@ -59,15 +59,6 @@ public class CategoryController {
         return categoryService.updateCategory(id, request);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-        log.info("delete category");
-
-        log.debug("Delete id={}", id);
-
-        categoryService.deleteCategory(id);
-    }
-
     @PatchMapping("/{id}")
     public void softDelete(@PathVariable int id) throws Exception {
         log.info("soft delete category");

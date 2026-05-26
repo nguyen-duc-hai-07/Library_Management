@@ -1,314 +1,198 @@
 package com.library.service.impl;
 
-import com.library.config.DBConnectionPool;
-import com.library.dao.AuthorDao;
-import com.library.dao.BookDao;
-import com.library.dao.CategoryDao;
 import com.library.dto.request.BookFilterRequest;
 import com.library.dto.request.BookRequest;
-import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
-import com.library.dto.response.CategoryResponse;
 import com.library.dto.response.UserResponse;
 import com.library.model.Author;
 import com.library.model.Book;
 import com.library.model.Category;
+import com.library.repository.AuthorRepository;
+import com.library.repository.BookRepository;
+import com.library.repository.CategoryRepository;
 import com.library.service.BookService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
 import java.util.List;
 
 @Slf4j
 @Service
+@Transactional
 public class BookServiceImpl implements BookService {
-    private final BookDao bookDao;
-    private final AuthorDao authorDao;
-    private final CategoryDao categoryDao;
-    private final DBConnectionPool pool = DBConnectionPool.getInstance();
+    private final BookRepository bookRepository;
+    private final CategoryRepository categoryRepository;
+    private final AuthorRepository authorRepository;
 
-    public BookServiceImpl(BookDao bookDao, AuthorDao authorDao, CategoryDao categoryDao) {
-        this.bookDao = bookDao;
-        this.authorDao = authorDao;
-        this.categoryDao = categoryDao;
+    public BookServiceImpl(BookRepository bookRepository, CategoryRepository categoryRepository, AuthorRepository authorRepository) {
+        this.categoryRepository = categoryRepository;
+        this.authorRepository = authorRepository;
+        this.bookRepository = bookRepository;
     }
 
+    @Override
     public BookResponse createBook(BookRequest bookRequest) throws Exception {
-        Connection conn = null;
-        Book book = new Book(
-                bookRequest.getAuthorId(),
-                bookRequest.getCategoryId(),
-                bookRequest.getTitle(),
-                bookRequest.getDescription(),
-                bookRequest.getIsbn(),
-                bookRequest.getName(),
-                bookRequest.getPublisher(),
-                bookRequest.getPublishYear()
-        );
         log.info("Create book");
-        try {
-            conn = pool.getConnection();
 
-            AuthorResponse author = authorDao.getAuthorById(conn, bookRequest.getAuthorId());
+        Author author = authorRepository.findEntityById(bookRequest.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
 
-            if (author == null || author.getIsDeleted()) {
-                throw new RuntimeException("Author not found");
-            }
+        Category category = categoryRepository.findEntityById(bookRequest.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
 
-            CategoryResponse category = categoryDao.getCategoryById(conn, bookRequest.getCategoryId());
+        Book book = Book.builder()
+                .title(bookRequest.getTitle())
+                .description(bookRequest.getDescription())
+                .isbn(bookRequest.getIsbn())
+                .name(bookRequest.getName())
+                .publisher(bookRequest.getPublisher())
+                .publishYear(bookRequest.getPublishYear())
+                .author(author)
+                .category(category)
+                .build();
 
-            if (category == null || category.getIsDeleted()) {
-                throw new RuntimeException("Category not found");
-            }
+        Book savedBook = bookRepository.save(book);
 
-            bookDao.insert(conn, book);
+        log.info("Book created successfully with id={}", savedBook.getId());
 
-            conn.commit();
-
-            log.info("Book created successfully with id = {}", book.getId());
-
-            return bookDao.getBookById(conn, book.getId());
-        } catch (Exception e) {
-            log.error("Error creating book: {}", e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return BookResponse.builder()
+                .id(savedBook.getId())
+                .title(savedBook.getTitle())
+                .description(savedBook.getDescription())
+                .isbn(savedBook.getIsbn())
+                .name(savedBook.getName())
+                .publisher(savedBook.getPublisher())
+                .publishYear(savedBook.getPublishYear())
+                .authorId(savedBook.getAuthor().getId())
+                .categoryId(savedBook.getCategory().getId())
+                .authorName(savedBook.getAuthor().getName())
+                .categoryName(savedBook.getCategory().getName())
+                .totalQuantity(savedBook.getTotalQuantity())
+                .availableQuantity(savedBook.getAvailableQuantity())
+                .build();
     }
 
-    public BookResponse viewBookById(int id) throws Exception {
-        Connection conn = null;
-        log.info("View book by id = {}", id);
-        try {
-            conn = pool.getConnection();
-
-            BookResponse book = bookDao.getBookById(conn, id);
-            if (book == null) {
-                log.warn("Book not found with id={}", id);
-                throw new Exception("Book not found");
-            }
-
-            conn.commit();
-
-            log.info("Book found successfully with id = {}", id);
-
-            return book;
-
-        } catch (Exception e) {
-            log.error("Error viewing book: {}", e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
-    }
-
+    @Override
     public List<BookResponse> filter(BookFilterRequest filter) throws Exception {
-        Connection conn = null;
-        log.info(
-                "View books with filter: keyword={}, page={}, size={}",
+        log.info("View books with filter: keyword={}, page={}, size={}",
                 filter.getKeyword(),
                 filter.getPage(),
-                filter.getSize()
-        );
-        try {
-            conn = pool.getConnection();
+                filter.getSize());
 
-            List<BookResponse> books = bookDao.getBooksWithFilter(conn, filter);
+        Pageable pageable = PageRequest.of(filter.getPage() - 1, filter.getSize());
 
-            conn.commit();
-
-            log.info("Books found successfully, total={}", books.size());
-
-            return books;
-        } catch (Exception e) {
-
-            log.error("Error viewing books with filter: {}", e.getMessage(), e);
-
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return bookRepository.findWithFilter(filter.getKeyword(), pageable);
     }
 
-    public void softDeleteBook(int id) throws Exception {
-        Connection conn = null;
-        log.info("Soft delete book by id = {}", id);
-        try {
-            conn = pool.getConnection();
+    @Override
+    public BookResponse viewBookById(int id) throws Exception {
+        log.info("View book with id={}", id);
 
-            BookResponse existingBook = bookDao.getBookById(conn, id);
-            if (existingBook == null) {
-                log.warn("Book not found with id={}", id);
-                throw new Exception("Book not found");
-            }
+        BookResponse books = getBookResponseOrThrow(id); //hàm check id tồn tại
 
-            bookDao.softDelete(conn, id);
+        log.info("Book found successfully with id={}", id);
 
-            conn.commit();
-
-            log.info("Book soft deleted successfully with id = {}", id);
-        } catch (Exception e) {
-            log.error("Error soft deleting book: {}", e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return books;
     }
 
+    @Override
     public BookResponse updateBook(int id, BookRequest bookRequest) throws Exception {
-        Connection conn = null;
-        Book book = new Book(
-                bookRequest.getAuthorId(),
-                bookRequest.getCategoryId(),
+        log.info("Update book with id={}", id);
+
+        Book books = getBookOrThrow(id);
+
+        Author author = authorRepository.findEntityById(bookRequest.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+
+        Category category = categoryRepository.findEntityById(bookRequest.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Book updatedBook = new Book(
+                books.getId(),
                 bookRequest.getTitle(),
                 bookRequest.getDescription(),
                 bookRequest.getIsbn(),
                 bookRequest.getName(),
                 bookRequest.getPublisher(),
-                bookRequest.getPublishYear()
+                bookRequest.getPublishYear(),
+                author,
+                category
         );
-        book.setId(id);
-        log.info("Update book by id = {}", id);
-        try {
-            conn = pool.getConnection();
 
-            BookResponse existingBook = bookDao.getBookById(conn, id);
-            if (existingBook == null) {
-                log.warn("Book not found with id={}", id);
-                throw new Exception("Book not found");
-            }
+        Book saved = bookRepository.save(updatedBook);
 
-            bookDao.update(conn, book);
+        log.info("Book updated successfully with id = {}", id);
 
-            conn.commit();
-
-            log.info("Book updated successfully with id = {}", id);
-
-            return bookDao.getBookById(conn, id);
-        } catch (Exception e) {
-            log.error("Update book by id = {} failed: {}", id, e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return BookResponse.builder()
+                .id(saved.getId())
+                .title(saved.getTitle())
+                .isbn(saved.getIsbn())
+                .name(saved.getName())
+                .description(saved.getDescription())
+                .publisher(saved.getPublisher())
+                .publishYear(saved.getPublishYear())
+                .authorId(saved.getAuthor().getId())
+                .categoryId(saved.getCategory().getId())
+                .authorName(saved.getAuthor().getName())
+                .categoryName(saved.getCategory().getName())
+                .totalQuantity(saved.getTotalQuantity())
+                .availableQuantity(saved.getAvailableQuantity())
+                .build();
     }
 
-    public void deleteBook(int id) throws Exception {
-        Connection conn = null;
-        log.info("Delete book by id = {}", id);
-        try {
-            conn = pool.getConnection();
+    @Override
+    public void softDeleteBook(int id) throws Exception {
+        log.info("Soft delete book with id={}", id);
 
-            BookResponse existingBook = bookDao.getBookById(conn, id);
-            if (existingBook == null) {
-                log.warn("Book not found with id={}", id);
-                throw new Exception("Book not found");
-            }
-            bookDao.delete(conn, id);
+        getBookOrThrow(id);
 
-            conn.commit();
+        bookRepository.softDelete(id);
 
-            log.info("Book deleted successfully with id = {}", id);
-        } catch (Exception e) {
-            log.error("Delete book by id = {} failed: {}", id, e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        log.info("Book soft deleted successfully with id = {}", id);
     }
 
+    @Override
     public List<UserResponse> viewAllUsersByBook(int bookId) throws Exception {
-        Connection conn = null;
-        log.info("View all users by book with id = {}", bookId);
+        log.info("View all users with bookId = {}", bookId);
 
-        try {
-            conn = pool.getConnection();
+        getBookResponseOrThrow(bookId);
 
-            BookResponse existingBook = bookDao.getBookById(conn, bookId);
-            if (existingBook == null) {
-                log.warn("Book not found with id={}", bookId);
-                throw new Exception("Book not found");
-            }
+        List<UserResponse> users = bookRepository.findUsersByBookId(bookId);
 
-            List<UserResponse> users = bookDao.getUsersByBookId(conn, bookId);
+        log.info("Users found successfully with book id={}", bookId);
 
-            conn.commit();
-
-            log.info("All users found successfully with book id = {}", bookId);
-
-            return users;
-        } catch (Exception e) {
-            log.error("Error viewing all users by book: {}", e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return users;
     }
 
+    @Override
     public BookResponse updateQuantity(int id, int quantity) throws Exception {
-        Connection conn = null;
-        log.info("Update quantity of book with id = {}", id);
+        log.info("Update quantity of book with id={}", id);
 
-        try {
-            conn = pool.getConnection();
+        getBookOrThrow(id);
 
-            BookResponse existingBook = bookDao.getBookById(conn, id);
-            if (existingBook == null) {
-                log.warn("Book not found with id={}", id);
-            }
-            bookDao.updateQuantity(conn, id, quantity);
+        bookRepository.updateAvailableQuantity(id, quantity);
 
-            conn.commit();
+        log.info("Quantity updated successfully with id={}", id);
 
-            log.info("Quantity updated successfully with book id = {}", id);
+        return getBookResponseOrThrow(id);
+    }
 
-            return bookDao.getBookById(conn, id);
-        } catch (Exception e) {
-            log.error("Error updating quantity: {}", e.getMessage());
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+    private Book getBookOrThrow(int id) {
+        return bookRepository.findEntityById(id)
+                .orElseThrow(() -> {
+                    log.warn("Book not found with id={}", id);
+                    return new RuntimeException("Book not found");
+                });
+    }
+
+    private BookResponse getBookResponseOrThrow(int id) {
+        return bookRepository.findActiveBookById(id)
+                .orElseThrow(() -> {
+                    log.warn("Book not found with id={}", id);
+                    return new RuntimeException("Book not found");
+                });
     }
 }

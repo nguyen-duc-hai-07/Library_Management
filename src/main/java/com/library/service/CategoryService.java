@@ -11,17 +11,15 @@ import com.library.model.Category;
 import java.util.List;
 
 public interface CategoryService {
-    CategoryResponse createCategory(CategoryRequest request) throws Exception;
+    CategoryResponse createCategory(CategoryRequest request);
 
-    List<CategoryResponse> filter(CategoryFilterRequest filter) throws Exception;
+    List<CategoryResponse> filter(CategoryFilterRequest filter);
 
-    CategoryResponse viewCategoryById(int id) throws Exception;
+    CategoryResponse viewCategoryById(int id);
 
-    CategoryResponse updateCategory(int id, CategoryRequest request) throws Exception;
+    CategoryResponse updateCategory(int id, CategoryRequest request);
 
-    void deleteCategory(int id) throws Exception;
+    void softDeleteCategory(int id) ;
 
-    void softDeleteCategory(int id) throws Exception;
-
-    List<BookResponse> viewAllBooksByCategory(int categoryId) throws Exception;
+    List<BookResponse> viewAllBooksByCategory(int categoryId) ;
 }

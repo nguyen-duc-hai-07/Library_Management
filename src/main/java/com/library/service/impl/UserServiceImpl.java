@@ -1,307 +1,58 @@
 package com.library.service.impl;
 
-import com.library.config.DBConnectionPool;
-import com.library.dao.UserDao;
 import com.library.dto.request.UserFilterRequest;
 import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
 import com.library.dto.response.UserResponse;
-import com.library.model.User;
 import com.library.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.List;
 
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-    private final UserDao userDao;
-    private final DBConnectionPool pool = DBConnectionPool.getInstance();
 
-    public UserServiceImpl(UserDao userDao) {
-        this.userDao = userDao;
-    }
-
+    @Override
     public List<UserResponse> filter(UserFilterRequest filter) throws Exception {
-        Connection conn = null;
-        log.info(
-                "View users with filter: keyword={}, role={}, status={}, page={}, size={}",
-                filter.getKeyword(),
-                filter.getRole(),
-                filter.getStatus(),
-                filter.getPage(),
-                filter.getSize()
-        );
-        try {
-            conn = pool.getConnection();
-
-            List<UserResponse> userResponses = userDao.getUsersWihFilter(conn, filter);
-
-            conn.commit();
-
-            log.info("Users found successfully, total = {}", userResponses.size());
-
-            return userResponses;
-        } catch (Exception e) {
-            log.error("View users with filter failed: {}", e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return List.of();
     }
 
+    @Override
     public UserResponse createUser(UserRequest request) throws Exception {
-        Connection conn = null;
-        User user = new User(
-                request.getFullName(),
-                request.getEmail(),
-                request.getPhoneNumber(),
-                request.getPasswordHash(),
-                request.getRole(),
-                request.getStatus()
-        );
-        log.info("Create user");
-
-        try {
-            conn = pool.getConnection();
-
-            userDao.insert(conn, user);
-
-            conn.commit();
-
-            log.info("User created successfully with id = {}", user.getId());
-
-            return new UserResponse(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getFullName(),
-                    user.getPhoneNumber(),
-                    user.getRole(),
-                    user.getStatus(),
-                    user.getCreatedAt()
-            );
-        } catch (Exception e) {
-            log.error("Error creating user: {}", e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return null;
     }
 
+    @Override
     public UserResponse viewUserById(int id) throws Exception {
-        Connection conn = null;
-        log.info("View user by id = {}", id);
-        try {
-            conn = pool.getConnection();
-
-            UserResponse user = userDao.getUserById(conn, id);
-            if (user == null) {
-                log.warn("User not found with id={}", id);
-                throw new Exception("User not found");
-            }
-
-            conn.commit();
-
-            log.info("User found successfully with id = {}", id);
-
-            return user;
-        } catch (Exception e) {
-            log.error("View user by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return null;
     }
 
+    @Override
     public UserResponse updateUser(int id, UserRequest request) throws Exception {
-        Connection conn = null;
-        User user = new User(
-                request.getFullName(),
-                request.getEmail(),
-                request.getPhoneNumber(),
-                request.getPasswordHash(),
-                request.getRole(),
-                request.getStatus()
-        );
-        user.setId(id);
-        log.info("Update user by id = {}", id);
-        try {
-            conn = pool.getConnection();
-
-            UserResponse existingUser = userDao.getUserById(conn, id);
-            if (existingUser == null) {
-                log.warn("User not found with id={}", id);
-                throw new Exception("User not found");
-            }
-
-            userDao.update(conn, user);
-
-            conn.commit();
-
-            log.info("User updated successfully with id = {}", id);
-
-            return new UserResponse(
-                    user.getId(),
-                    user.getFullName(),
-                    user.getEmail(),
-                    user.getPhoneNumber(),
-                    user.getRole(),
-                    user.getStatus(),
-                    user.getCreatedAt()
-            );
-        } catch (Exception e) {
-            log.error("Update user by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return null;
     }
 
+    @Override
     public void deleteUser(int id) throws Exception {
-        Connection conn = null;
-        log.info("Delete user by id = {}", id);
-        try {
-            conn = pool.getConnection();
 
-            UserResponse existingUser = userDao.getUserById(conn, id);
-            if (existingUser == null) {
-                log.warn("User not found with id={}", id);
-                throw new Exception("User not found");
-            }
-
-            userDao.delete(conn, id);
-
-            conn.commit();
-
-            log.info("User deleted successfully with id = {}", id);
-        } catch (Exception e) {
-            log.error("Delete user by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
     }
 
+    @Override
     public void softDeleteUser(int id) throws Exception {
-        Connection conn = null;
-        log.info("Soft delete user by id = {}", id);
-        try {
-            conn = pool.getConnection();
 
-            UserResponse existingUser = userDao.getUserById(conn, id);
-            if (existingUser == null) {
-                log.warn("User not found with id={}", id);
-                throw new Exception("User not found");
-            }
-
-            userDao.softDelete(conn, id);
-
-            conn.commit();
-
-            log.info("User soft deleted successfully with id = {}", id);
-        } catch (Exception e) {
-            log.error("Soft delete user by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
     }
 
+    @Override
     public List<BookResponse> viewAllBooksByUser(int userId) throws Exception {
-        Connection conn = null;
-        log.info("View all books by user id = {}", userId);
-        try {
-            conn = pool.getConnection();
-
-            UserResponse existingUser = userDao.getUserById(conn, userId);
-            if (existingUser == null) {
-                log.warn("User not found with id={}", userId);
-                throw new Exception("User not found");
-            }
-
-            List<BookResponse> books = userDao.getBooksByUserId(conn, userId);
-
-            conn.commit();
-
-            log.info("Books found successfully with user id = {}", userId);
-
-            return books;
-        } catch (Exception e) {
-            log.error("View all books by user id = {} failed: {}", userId, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return List.of();
     }
 
+    @Override
     public List<FineResponse> viewAllFinesByUser(int userId) throws Exception {
-        Connection conn = null;
-        log.info("View all fines by user id = {}", userId);
-        try {
-            conn = pool.getConnection();
-
-            UserResponse existingUser = userDao.getUserById(conn, userId);
-            if (existingUser == null) {
-                log.warn("User not found with id={}", userId);
-                throw new Exception("User not found");
-            }
-
-            List<FineResponse> fines = userDao.getFinesByUserId(conn, userId);
-
-            conn.commit();
-
-            log.info("Fines found successfully with user id = {}", userId);
-
-            return fines;
-        } catch (Exception e) {
-            log.error("View all fines by user id = {} failed: {}", userId, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return List.of();
     }
 }

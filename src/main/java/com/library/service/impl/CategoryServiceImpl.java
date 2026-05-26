@@ -1,270 +1,122 @@
 package com.library.service.impl;
 
-import com.library.config.DBConnectionPool;
-import com.library.dao.CategoryDao;
 import com.library.dto.request.CategoryFilterRequest;
 import com.library.dto.request.CategoryRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
 import com.library.model.Category;
+import com.library.repository.CategoryRepository;
 import com.library.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Connection;
 import java.util.List;
 
 @Slf4j
 @Service
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
-    private final CategoryDao categoryDao;
-    private final DBConnectionPool pool = DBConnectionPool.getInstance();
+    private final CategoryRepository categoryRepository;
 
-    public CategoryServiceImpl(CategoryDao categoryDao) {
-        this.categoryDao = categoryDao;
+    public CategoryServiceImpl(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
     }
 
-    public CategoryResponse createCategory(CategoryRequest request) throws Exception {
-        Connection conn = null;
+    @Override
+    public CategoryResponse createCategory(CategoryRequest request) {
+        log.info("create category");
 
-        Category category = new Category(request.getName());
-
-        log.info("Create category");
-
-        try {
-            conn = pool.getConnection();
-
-            categoryDao.insert(conn, category);
-
-            conn.commit();
-
-            log.info("Category created successfully with id = {}", category.getId());
-
-            return new CategoryResponse(
-                    category.getId(),
-                    category.getName()
-            );
-        } catch (Exception e) {
-            log.error("Create category failed: {}", e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
-    }
-
-    public List<CategoryResponse> filter(CategoryFilterRequest filter) throws Exception {
-
-        Connection conn = null;
-
-        log.info(
-                "View categories with filter: keyword={}, page={}, size={}",
-                filter.getKeyword(),
-                filter.getPage(),
-                filter.getSize()
+        Category categories = new Category(
+                request.getName()
         );
 
-        try {
+        Category saved = categoryRepository.save(categories);
 
-            conn = pool.getConnection();
+        log.info("Category created successfully");
 
-            List<CategoryResponse> categories =
-                    categoryDao.getCategoriesWithFilter(
-                            conn,
-                            filter
-                    );
-
-            conn.commit();
-
-            log.info(
-                    "Categories found successfully, total={}",
-                    categories.size()
-            );
-
-            return categories;
-
-        } catch (Exception e) {
-
-            log.error("View categories with filter failed: {}", e.getMessage(), e);
-
-            if (conn != null) {
-                conn.rollback();
-            }
-
-            throw e;
-
-        } finally {
-
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return new CategoryResponse(
+                saved.getId(),
+                saved.getName()
+        );
     }
 
-    public CategoryResponse viewCategoryById(int id) throws Exception {
-        Connection conn = null;
-        log.info("View category with id = {}", id);
+    @Override
+    public List<CategoryResponse> filter(CategoryFilterRequest filter) {
+        log.info("View categories with filter: keyword={}, page={}, size={}",
+                filter.getKeyword(),
+                filter.getPage(),
+                filter.getSize());
 
-        try {
-            conn = pool.getConnection();
+        Pageable pageable = PageRequest.of(filter.getPage() - 1, filter.getSize());
 
-            CategoryResponse category = categoryDao.getCategoryById(conn, id);
-            if (category == null) {
-                log.warn("Category not found with id={}", id);
-                throw new Exception("Category not found");
-            }
-
-            conn.commit();
-
-            log.info("Category found successfully with id = {}", id);
-
-            return category;
-        } catch (Exception e) {
-            log.error("View category by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return categoryRepository.findWithFilter(filter.getKeyword(), pageable);
     }
 
-    public CategoryResponse updateCategory(int id, CategoryRequest request) throws Exception {
-        Connection conn = null;
-        Category category = new Category(request.getName());
+    @Override
+    public CategoryResponse viewCategoryById(int id) {
+        log.info("View category with id={}", id);
+
+        CategoryResponse categories = getCategoryResponseOrThrow(id);
+
+        log.info("Category found successfully with id={}", id);
+
+        return categories;
+    }
+
+    @Override
+    public CategoryResponse updateCategory(int id, CategoryRequest request) {
         log.info("Update category with id = {}", id);
 
-        try {
-            conn = pool.getConnection();
+        Category category = categoryRepository.findEntityById(id)
+                .orElseThrow(() -> {
+                    log.warn("Category not found with id={}", id);
+                    return new RuntimeException("Category not found");
+                });
 
-            CategoryResponse existingCategory = categoryDao.getCategoryById(conn, id);
-            if (existingCategory == null) {
-                log.warn("Category not found with id={}", id);
-                throw new Exception("Category not found");
-            }
+        category.setName(request.getName());
 
-            categoryDao.update(conn, category);
+        Category saved = categoryRepository.save(category);
 
-            conn.commit();
+        log.info("Category updated successfully with id = {}", id);
 
-            log.info("Category updated successfully with id = {}", id);
-
-            return new CategoryResponse(
-                    category.getId(),
-                    category.getName()
-            );
-        } catch (Exception e) {
-            log.error("Update category by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return new CategoryResponse(
+                saved.getId(),
+                saved.getName()
+        );
     }
 
-    public void deleteCategory(int id) throws Exception {
-        Connection conn = null;
-        log.info("Delete category with id = {}", id);
+    @Override
+    public void softDeleteCategory(int id) {
+        log.info("Soft delete category with id={}", id);
 
-        try {
-            conn = pool.getConnection();
+        getCategoryResponseOrThrow(id);
 
-            CategoryResponse existingCategory = categoryDao.getCategoryById(conn, id);
-            if (existingCategory == null) {
-                log.warn("Category not found with id={}", id);
-                throw new Exception("Category not found");
-            }
+        categoryRepository.softDelete(id);
 
-            categoryDao.delete(conn, id);
-
-            conn.commit();
-
-            log.info("Category deleted successfully with id = {}", id);
-        } catch (Exception e) {
-            log.error("Delete category by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        log.info("Category soft deleted successfully with id = {}", id);
     }
 
-    public void softDeleteCategory(int id) throws Exception {
-        Connection conn = null;
-        log.info("Soft delete category with id = {}", id);
+    @Override
+    public List<BookResponse> viewAllBooksByCategory(int categoryId) {
+        log.info("View all books by category with id={}", categoryId);
 
-        try {
-            conn = pool.getConnection();
+        getCategoryResponseOrThrow(categoryId);
 
-            CategoryResponse existingCategory = categoryDao.getCategoryById(conn, id);
-            if (existingCategory == null) {
-                log.warn("Category not found with id={}", id);
-                throw new Exception("Category not found");
-            }
+        List<BookResponse> books = categoryRepository.findBooksByCategoryId(categoryId);
 
-            categoryDao.softDelete(conn, id);
+        log.info("Books found successfully with category id={} and total = {}", categoryId, books.size());
 
-            conn.commit();
-
-            log.info("Category soft deleted successfully with id = {}", id);
-        } catch (Exception e) {
-            log.error("Soft delete category by id = {} failed: {}", id, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+        return books;
     }
 
-    public List<BookResponse> viewAllBooksByCategory(int categoryId) throws Exception {
-        Connection conn = null;
-        log.info("View all books by category id = {}", categoryId);
-
-        try {
-            conn = pool.getConnection();
-
-            CategoryResponse existingCategory = categoryDao.getCategoryById(conn, categoryId);
-            if (existingCategory == null) {
-                log.warn("Category not found with id={}", categoryId);
-                throw new Exception("Category not found");
-            }
-
-            List<BookResponse> books = categoryDao.getBooksByCategoryId(conn, categoryId);
-
-            conn.commit();
-
-            log.info("Books found successfully with category id = {}", categoryId);
-
-            return books;
-        } catch (Exception e) {
-            log.error("View all books by category id = {} failed: {}", categoryId, e.getMessage(), e);
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.close();
-            }
-        }
+    private CategoryResponse getCategoryResponseOrThrow(int id) {
+        return categoryRepository.findActiveById(id)
+                .orElseThrow(() -> {
+                    log.warn("Category not found with id={}", id);
+                    return new RuntimeException("Category not found");
+                });
     }
 }
