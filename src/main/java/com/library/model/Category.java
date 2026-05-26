@@ -21,4 +21,7 @@ public class Category {
     @Builder.Default
     private boolean isDeleted = false;
 
+    public Category(String name) {
+        this.name = name;
+    }
 }
