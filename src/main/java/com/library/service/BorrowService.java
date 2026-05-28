@@ -1,6 +1,5 @@
 package com.library.service;
 
-import com.library.dto.request.BookFilterRequest;
 import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BorrowResponse;
@@ -8,15 +7,13 @@ import com.library.dto.response.BorrowResponse;
 import java.util.List;
 
 public interface BorrowService {
-    BorrowResponse borrowBook(BorrowRequest borrowRequest) throws Exception;
+    BorrowResponse borrowBook(BorrowRequest borrowRequest);
 
-    List<BorrowResponse> filter(BorrowFilterRequest filter) throws Exception;
+    List<BorrowResponse> filter(BorrowFilterRequest filter);
 
-    BorrowResponse viewBorrowById(int id) throws Exception;
+    BorrowResponse viewBorrowById(int id);
 
-    void deleteBorrow(int id) throws Exception;
+    void softDeleteBorrow(int id);
 
-    void softDeleteBorrow(int id) throws Exception;
-
-    BorrowResponse returnBook(int id) throws Exception;
+    BorrowResponse returnBook(int id);
 }
