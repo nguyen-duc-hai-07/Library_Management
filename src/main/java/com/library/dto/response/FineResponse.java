@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Data
 @Builder
@@ -19,50 +20,21 @@ public class FineResponse {
     private int userId;
     private int borrowId;
     private FineStatus status;
-    private double fineAmount;
+    private BigDecimal fineAmount;
     private int daysLate;
     private LocalDateTime paidAt;
 
-    public int getId() {
-        return id;
-    }
-    public void setId(int id) {
+    public FineResponse(
+            int id, int userId, int borrowId,
+            FineStatus status, int daysLate, BigDecimal fineAmount,
+            LocalDateTime paidAt
+    ) {
         this.id = id;
-    }
-    public int getUserId() {
-        return userId;
-    }
-    public void setUserId(int userId) {
         this.userId = userId;
-    }
-    public int getBorrowId() {
-        return borrowId;
-    }
-    public void setBorrowId(int borrowId) {
         this.borrowId = borrowId;
-    }
-    public FineStatus getStatus() {
-        return status;
-    }
-    public void setStatus(FineStatus status) {
         this.status = status;
-    }
-    public double getFineAmount() {
-        return fineAmount;
-    }
-    public void setFineAmount(double fineAmount) {
-        this.fineAmount = fineAmount;
-    }
-    public int getDaysLate() {
-        return daysLate;
-    }
-    public void setDaysLate(int daysLate) {
         this.daysLate = daysLate;
-    }
-    public LocalDateTime getPaidAt() {
-        return paidAt;
-    }
-    public void setPaidAt(LocalDateTime paidAt) {
+        this.fineAmount = fineAmount;
         this.paidAt = paidAt;
     }
 }
