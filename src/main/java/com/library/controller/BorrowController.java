@@ -50,15 +50,6 @@ public class BorrowController {
         return borrowService.borrowBook(borrow);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-        log.info("delete borrows");
-
-        log.debug("Borrow id={}", id);
-
-        borrowService.deleteBorrow(id);
-    }
-
     @PatchMapping("/{id}")
     public void softDelete(@PathVariable int id) throws Exception {
         log.info("soft delete borrows");
