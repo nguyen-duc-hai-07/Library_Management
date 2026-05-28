@@ -89,11 +89,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             """)
     List<UserResponse> findWithFilter(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("""
-            SELECT u.email, u.passwordHash
-            FROM User u
-            WHERE u.email = :email
-            AND u.isDeleted = false
-            """)
-    User findByEmail(@Param("email") String email);
+    @Query("SELECT u FROM User u WHERE u.email = :email AND u.isDeleted = false")
+    Optional<User> findByEmail(@Param("email") String email);
 }
