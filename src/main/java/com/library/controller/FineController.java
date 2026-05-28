@@ -59,14 +59,6 @@ public class FineController {
         fineService.softDeleteFine(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-        log.info("delete fine");
-        log.debug("Delete id={}", id);
-
-        fineService.deleteFine(id);
-    }
-
     @PatchMapping("/{id}/pay")
     public FineResponse payFine(@PathVariable int id) throws Exception {
         log.info("pay fine");
