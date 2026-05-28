@@ -5,23 +5,22 @@ import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
 import com.library.dto.response.UserResponse;
+
 import java.util.List;
 
 
 public interface UserService {
-    List<UserResponse> filter(UserFilterRequest filter) throws Exception;
+    List<UserResponse> filter(UserFilterRequest filter);
 
-    UserResponse createUser(UserRequest request) throws Exception;
+    UserResponse createUser(UserRequest request);
 
-    UserResponse viewUserById(int id) throws Exception;
+    UserResponse viewUserById(int id);
 
-    UserResponse updateUser(int id, UserRequest request) throws Exception;
+    UserResponse updateUser(int id, UserRequest request);
 
-    void deleteUser(int id) throws Exception;
+    void softDeleteUser(int id);
 
-    void softDeleteUser(int id) throws Exception;
+    List<BookResponse> viewAllBooksByUser(int userId);
 
-    List<BookResponse> viewAllBooksByUser(int userId) throws Exception;
-
-    List<FineResponse> viewAllFinesByUser(int userId) throws Exception;
+    List<FineResponse> viewAllFinesByUser(int userId);
 }
