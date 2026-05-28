@@ -2,11 +2,9 @@ package com.library.dto.response;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.library.model.Book;
 import com.library.model.UserRole;
 import com.library.model.UserStatus;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -33,5 +31,18 @@ public class UserResponse {
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
+    }
+
+    public UserResponse(int id, String fullName, String email,
+                        String phoneNumber, UserRole role, UserStatus status,
+                        LocalDateTime created
+    ) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.status = status;
+        this.createdAt = created;
     }
 }

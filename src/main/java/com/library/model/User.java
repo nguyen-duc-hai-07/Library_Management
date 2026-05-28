@@ -44,4 +44,16 @@ public class User {
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
 
+    public User(int id, String fullName, String email,
+                String phoneNumber, String passwordHash,
+                UserRole role , UserStatus status
+    ) {
+        this.id = id;
+        this.fullName = fullName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.passwordHash = passwordHash;
+        this.role = role;
+        this.status = status;
+    }
 }
