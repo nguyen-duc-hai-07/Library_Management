@@ -43,16 +43,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequest request) {
-        log.info("Login user");
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.warn("User not found with email={}", request.getEmail());
+                    return new RuntimeException("Invalid email or password");
+                });
 
-        User user = userRepository.findByEmail(request.getEmail());
-
-        if (user == null || !user.getPasswordHash().equals(request.getPassword())) {
+        if (!user.getPasswordHash().equals(request.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 
         log.info("User logged in successfully");
-
         return UUID.randomUUID().toString();
     }
 }
