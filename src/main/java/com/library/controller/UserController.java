@@ -64,15 +64,6 @@ public class UserController {
         return userService.updateUser(id, request);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-        log.info("delete user");
-
-        log.debug("Delete id={}", id);
-
-        userService.deleteUser(id);
-    }
-
     @PatchMapping("/{id}")
     public void softDelete(@PathVariable int id) throws Exception {
         log.info("soft delete user");
