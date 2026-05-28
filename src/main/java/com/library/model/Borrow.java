@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -45,6 +47,8 @@ public class Borrow {
 
     @Column(columnDefinition = "borrow_status")
     @Enumerated(EnumType.STRING)
-    private BorrowStatus status;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Builder.Default
+    private BorrowStatus status = BorrowStatus.BORROWING;
 
 }
