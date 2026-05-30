@@ -34,7 +34,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse createBook(BookRequest bookRequest) throws Exception {
+    public BookResponse createBook(BookRequest bookRequest)  {
         log.info("Create book");
 
         Author author = authorRepository.findEntityById(bookRequest.getAuthorId())
@@ -76,7 +76,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookResponse> filter(BookFilterRequest filter) throws Exception {
+    public List<BookResponse> filter(BookFilterRequest filter)  {
         log.info("View books with filter: keyword={}, page={}, size={}",
                 filter.getKeyword(),
                 filter.getPage(),
@@ -88,7 +88,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse viewBookById(int id) throws Exception {
+    public BookResponse viewBookById(int id)  {
         log.info("View book with id={}", id);
 
         BookResponse books = getBookResponseOrThrow(id); //hàm check id tồn tại
@@ -99,7 +99,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse updateBook(int id, BookRequest bookRequest) throws Exception {
+    public BookResponse updateBook(int id, BookRequest bookRequest)  {
         log.info("Update book with id={}", id);
 
         Book books = getBookOrThrow(id);
@@ -144,7 +144,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void softDeleteBook(int id) throws Exception {
+    public void softDeleteBook(int id)  {
         log.info("Soft delete book with id={}", id);
 
         getBookOrThrow(id);
@@ -155,7 +155,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<UserResponse> viewAllUsersByBook(int bookId) throws Exception {
+    public List<UserResponse> viewAllUsersByBook(int bookId)  {
         log.info("View all users with bookId = {}", bookId);
 
         getBookResponseOrThrow(bookId);
@@ -168,7 +168,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse updateQuantity(int id, int quantity) throws Exception {
+    public BookResponse updateQuantity(int id, int quantity)  {
         log.info("Update quantity of book with id={}", id);
 
         getBookOrThrow(id);
@@ -194,5 +194,25 @@ public class BookServiceImpl implements BookService {
                     log.warn("Book not found with id={}", id);
                     return new RuntimeException("Book not found");
                 });
+    }
+
+    public Book getAvailableBookOrThrow(int bookId) {
+        Book book = bookRepository.findEntityById(bookId)
+                .orElseThrow(() -> {
+                    log.warn("Book not found with id={}", bookId);
+                    return new RuntimeException("Book not found");
+                });
+
+        if (book.getAvailableQuantity() <= 0) {
+            throw new RuntimeException("Book is out of stock");
+        }
+
+        return book;
+    }
+
+    public void updateStock(int bookId, int quantity) {
+        log.info("Update stock of book with id={}", bookId);
+
+        bookRepository.updateQuantity(bookId, quantity);
     }
 }

@@ -3,6 +3,7 @@ package com.library.controller;
 import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BorrowResponse;
+import com.library.facade.BorrowFacadeService;
 import com.library.service.BorrowService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,10 @@ import java.util.List;
 @RequestMapping("/api/v1/borrows")
 public class BorrowController {
     private final BorrowService borrowService;
+    private final BorrowFacadeService borrowFacadeService;
 
-    public BorrowController(BorrowService borrowService) {
+    public BorrowController(BorrowService borrowService, BorrowFacadeService borrowFacadeService) {
+        this.borrowFacadeService = borrowFacadeService;
         this.borrowService = borrowService;
     }
 
@@ -47,16 +50,7 @@ public class BorrowController {
     public BorrowResponse create(@RequestBody BorrowRequest borrow) throws Exception {
         log.info("create borrow");
 
-        return borrowService.borrowBook(borrow);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable int id) throws Exception {
-        log.info("delete borrows");
-
-        log.debug("Borrow id={}", id);
-
-        borrowService.deleteBorrow(id);
+        return borrowFacadeService.borrowBook(borrow);
     }
 
     @PatchMapping("/{id}")
@@ -74,7 +68,7 @@ public class BorrowController {
 
         log.debug("Borrow id={}", id);
 
-        return borrowService.returnBook(id);
+        return borrowFacadeService.returnBook(id);
     }
 }
 

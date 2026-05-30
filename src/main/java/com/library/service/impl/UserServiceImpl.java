@@ -150,4 +150,13 @@ public class UserServiceImpl implements UserService {
                     return new RuntimeException("User not found");
                 });
     }
+
+    public User getAvailableUserOrThrow(int userId) {
+
+        return userRepository.findEntityById(userId)
+                .orElseThrow(() -> {
+                    log.warn("User not found with id={}", userId);
+                    return new RuntimeException("User not found");
+                });
+    }
 }
