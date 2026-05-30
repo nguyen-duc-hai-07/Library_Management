@@ -5,6 +5,7 @@ import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
 import com.library.dto.response.UserResponse;
+import com.library.model.User;
 
 import java.util.List;
 
@@ -23,4 +24,6 @@ public interface UserService {
     List<BookResponse> viewAllBooksByUser(int userId);
 
     List<FineResponse> viewAllFinesByUser(int userId);
+
+    User getAvailableUserOrThrow(int userId);
 }
