@@ -3,11 +3,12 @@ package com.library.service;
 import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BorrowResponse;
+import com.library.model.Borrow;
 
 import java.util.List;
 
 public interface BorrowService {
-    BorrowResponse borrowBook(BorrowRequest borrowRequest);
+    Borrow borrowBook(Borrow borrow);
 
     List<BorrowResponse> filter(BorrowFilterRequest filter);
 
