@@ -3,6 +3,7 @@ package com.library.controller;
 import com.library.dto.request.FineFilterRequest;
 import com.library.dto.request.FineRequest;
 import com.library.dto.response.FineResponse;
+import com.library.facade.FineFacadeService;
 import com.library.service.FineService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +15,10 @@ import java.util.List;
 @RequestMapping("/api/v1/fines")
 public class FineController {
     private final FineService fineService;
+    private final FineFacadeService fineFacadeService;
 
-    public FineController(FineService fineService) {
+    public FineController(FineService fineService, FineFacadeService fineFacadeService) {
+        this.fineFacadeService = fineFacadeService;
         this.fineService = fineService;
     }
 
@@ -30,7 +33,7 @@ public class FineController {
                 filter.getSize()
         );
 
-        return fineService.filter(filter);
+        return fineFacadeService.filter(filter);
     }
 
     @GetMapping("/{id}")
@@ -39,14 +42,14 @@ public class FineController {
 
         log.debug("fine id={}", id);
 
-        return fineService.viewFineById(id);
+        return fineFacadeService.viewFineById(id);
     }
 
     @PostMapping
     public FineResponse create(@RequestBody FineRequest fine) throws Exception {
         log.info("create fine");
 
-        return fineService.createFineForLateReturn(fine);
+        return fineFacadeService.createFineForLateReturn(fine);
 
     }
 
