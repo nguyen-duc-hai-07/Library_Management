@@ -1,14 +1,9 @@
 package com.library.service.impl;
 
 import com.library.dto.request.BorrowFilterRequest;
-import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BorrowResponse;
-import com.library.model.Book;
 import com.library.model.Borrow;
-import com.library.model.User;
-import com.library.repository.BookRepository;
 import com.library.repository.BorrowRepository;
-import com.library.repository.UserRepository;
 import com.library.service.BorrowService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -23,60 +18,18 @@ import java.util.List;
 @Transactional
 public class BorrowServiceImpl implements BorrowService {
     private final BorrowRepository borrowRepository;
-    private final BookRepository bookRepository;
-    private final UserRepository userRepository;
 
     public BorrowServiceImpl(
-            BorrowRepository borrowRepository,
-            BookRepository bookRepository,
-            UserRepository userRepository
-    ) {
+            BorrowRepository borrowRepository
+            ) {
         this.borrowRepository = borrowRepository;
-        this.bookRepository = bookRepository;
-        this.userRepository = userRepository;
     }
 
     @Override
-    public BorrowResponse borrowBook(BorrowRequest borrowRequest) {
+    public Borrow borrowBook(Borrow borrow) {
         log.info("borrow book");
 
-        Book book = bookRepository.findEntityById(borrowRequest.getBookId())
-                .orElseThrow(() -> {
-                    log.warn("Book not found with bookId={}", borrowRequest.getBookId());
-                    return new RuntimeException("Book not found");
-                });
-
-        if (book.getAvailableQuantity() <= 0) {
-            throw new RuntimeException("Book is out of stock");
-        }
-
-        User user = userRepository.findEntityById(borrowRequest.getUserId())
-                .orElseThrow(() -> {
-                    log.warn("User not found with userId={}", borrowRequest.getUserId());
-                    return new RuntimeException("User not found");
-                });
-
-        Borrow borrow = Borrow.builder()
-                .book(book)
-                .user(user)
-                .dueDate(borrowRequest.getDueDate())
-                .build();
-
-        Borrow savedBorrow = borrowRepository.save(borrow);
-
-        bookRepository.updateQuantity(savedBorrow.getBook().getId(), -1);
-
-        log.info("borrow book successfully with id={}", savedBorrow.getId());
-
-        return BorrowResponse.builder()
-                .id(savedBorrow.getId())
-                .bookId(savedBorrow.getBook().getId())
-                .userId(savedBorrow.getUser().getId())
-                .borrowDate(savedBorrow.getBorrowDate())
-                .dueDate(savedBorrow.getDueDate())
-                .returnDate(savedBorrow.getReturnDate())
-                .status(savedBorrow.getStatus())
-                .build();
+        return borrowRepository.save(borrow);
     }
 
     @Override
@@ -97,7 +50,7 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public BorrowResponse viewBorrowById(int id)  {
+    public BorrowResponse viewBorrowById(int id) {
         log.info("view borrow with id = {}", id);
 
         BorrowResponse borrows = getBorrowResponseOrThrow(id);
@@ -122,15 +75,13 @@ public class BorrowServiceImpl implements BorrowService {
     public BorrowResponse returnBook(int id) {
         log.info("return book with id = {}", id);
 
-        BorrowResponse borrow = getBorrowResponseOrThrow(id);
-
         borrowRepository.returnBook(id);
 
-        bookRepository.updateQuantity(borrow.getBookId(), 1);
+        BorrowResponse borrow = getBorrowResponseOrThrow(id);
 
         log.info("borrow returned successfully with id = {}", id);
 
-        return getBorrowResponseOrThrow(id);
+        return borrow;
     }
 
     private BorrowResponse getBorrowResponseOrThrow(int id) {
