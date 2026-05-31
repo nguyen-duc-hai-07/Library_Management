@@ -1,10 +1,8 @@
 package com.library.service.impl;
 
 import com.library.dto.request.FineFilterRequest;
-import com.library.dto.request.FineRequest;
 import com.library.dto.response.FineResponse;
 import com.library.model.Borrow;
-import com.library.model.BorrowStatus;
 import com.library.model.Fine;
 import com.library.model.FineStatus;
 import com.library.repository.BorrowRepository;
@@ -26,86 +24,25 @@ import java.util.List;
 @Transactional
 public class FineServiceImpl implements FineService {
     private final FineRepository fineRepository;
-    private final BorrowRepository borrowRepository;
 
-    public FineServiceImpl(FineRepository fineRepository, BorrowRepository borrowRepository) {
+    public FineServiceImpl(FineRepository fineRepository) {
         this.fineRepository = fineRepository;
-        this.borrowRepository = borrowRepository;
     }
 
     @Override
-    public FineResponse createFineForLateReturn(FineRequest fineRequest) {
+    public Fine createFineForLateReturn(Fine fine) {
+
         log.info("create fine");
 
-        if(fineRepository.existsByBorrowId(fineRequest.getBorrowId())){
-            log.warn("Fine already exists for borrowId={}", fineRequest.getBorrowId());
-            throw new RuntimeException("Fine already exists");
-        }
-
-        Borrow borrow = borrowRepository.findEntityById(fineRequest.getBorrowId())
-                .orElseThrow(() -> {
-                    log.warn("Borrow not found with borrowId={}", fineRequest.getBorrowId());
-                    return new RuntimeException("Borrow not found");
-                });
-
-        if(borrow.getStatus() == BorrowStatus.RETURNED){
-            log.warn("Borrow is already returned");
-            throw new RuntimeException("Borrow is already returned");
-        }
-
-        int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
-        if (daysLate <= 0) {
-            log.warn("Borrow is not late");
-            throw new RuntimeException("Borrow is not late");
-        }
-
-        BigDecimal fineAmount = BigDecimal.valueOf(daysLate * 10000L);
-
-        Fine fine = Fine.builder()
-                .borrow(borrow)
-                .user(borrow.getUser())
-                .daysLate(daysLate)
-                .fineAmount(fineAmount)
-                .build();
-
-        Fine savedFine = fineRepository.save(fine);
-
-        log.info("Fine created successfully with id={}", savedFine.getId());
-
-        return getFineResponseOrThrow(savedFine.getId());
+        return fineRepository.save(fine);
     }
+
 
     @Override
     public FineResponse viewFineById(int id) {
         log.info("view fine with id={}", id);
 
-        FineResponse fine = getFineResponseOrThrow(id);
-
-        Borrow borrow = borrowRepository.findEntityById(fine.getBorrowId())
-                .orElseThrow(() -> {
-                    log.warn("Borrow not found with borrowId={}", fine.getBorrowId());
-                    return new RuntimeException("Borrow not found");
-                });
-
-        int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
-        if (daysLate <= 0) {
-            log.warn("Borrow is not late");
-            throw new RuntimeException("Borrow is not late");
-        }
-
-        BigDecimal fineAmount = BigDecimal.valueOf(daysLate * 10000);
-
-        if (daysLate != fine.getDaysLate() && fine.getStatus() != FineStatus.PAID) {
-            fine.setDaysLate(daysLate);
-
-            fine.setFineAmount(fineAmount);
-
-            fineRepository.updateDaysLate(id, daysLate, fineAmount);
-
-            log.info("Fine updated successfully with id={}", id);
-        }
-
-        return fine;
+        return getFineResponseOrThrow(id);
     }
 
     @Override
@@ -143,42 +80,28 @@ public class FineServiceImpl implements FineService {
 
         Pageable pageable = PageRequest.of(filter.getPage() - 1, filter.getSize());
 
-        List<FineResponse> fines = fineRepository.findWithFilter(filter.getStatus(), pageable);
+        List<FineResponse> fineResponse = fineRepository.findWithFilter(filter.getStatus(), pageable);
 
-        for (FineResponse fine : fines) {
-            Borrow borrow = borrowRepository.findEntityById(fine.getBorrowId())
-                    .orElseThrow(() -> {
-                        log.warn("Borrow not found with borrowId={}", fine.getBorrowId());
-                        return new RuntimeException("Borrow not found");
-                    });
+        log.info("fines found successfully, total= {}", fineResponse.size());
 
-            int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
-            if (daysLate <= 0) {
-                log.warn("Borrow is not late");
-                throw new RuntimeException("Borrow is not late");
-            }
-
-            BigDecimal fineAmount = BigDecimal.valueOf(daysLate * 10000);
-
-            if (daysLate != fine.getDaysLate() && fine.getStatus() != FineStatus.PAID) {
-                fine.setDaysLate(daysLate);
-
-                fine.setFineAmount(fineAmount);
-
-                fineRepository.updateDaysLate(fine.getId(), daysLate, fineAmount);
-            }
-        }
-
-        log.info("fines found successfully, total= {}", fines.size());
-
-        return fines;
+        return fineResponse;
     }
 
-    private FineResponse getFineResponseOrThrow(int id) {
+    public FineResponse getFineResponseOrThrow(int id) {
         return fineRepository.findActiveById(id)
                 .orElseThrow(() -> {
                     log.warn("Fine not found with id={}", id);
                     return new RuntimeException("Fine not found");
                 });
+    }
+
+    public boolean existsByBorrowId(int borrowId) {
+        return fineRepository.existsByBorrowId(borrowId);
+    }
+
+    public void updateDaysLate(int id, int daysLate, BigDecimal fineAmount) {
+        log.info("Update days late and fine amount of fine with id={}", id);
+
+        fineRepository.updateDaysLate(id, daysLate, fineAmount);
     }
 }
