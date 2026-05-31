@@ -91,4 +91,12 @@ public class BorrowServiceImpl implements BorrowService {
                     return new RuntimeException("Borrow not found");
                 });
     }
+
+    public Borrow getAvailableBorrowOrThrow(int borrowId) {
+        return borrowRepository.findEntityById(borrowId)
+                .orElseThrow(() -> {
+                    log.warn("Borrow not found with id = {}", borrowId);
+                    return new RuntimeException("Borrow not found");
+                });
+    }
 }

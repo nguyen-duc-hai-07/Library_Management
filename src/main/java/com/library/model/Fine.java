@@ -2,6 +2,8 @@ package com.library.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,7 +29,9 @@ public class Fine {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "fine_status")
-    private FineStatus status;
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Builder.Default
+    private FineStatus status = FineStatus.UNPAID;
 
     @Column(name = "fine_amount", nullable = false)
     private BigDecimal fineAmount;

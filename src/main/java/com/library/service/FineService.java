@@ -3,19 +3,25 @@ package com.library.service;
 import com.library.dto.request.FineFilterRequest;
 import com.library.dto.request.FineRequest;
 import com.library.dto.response.FineResponse;
+import com.library.model.Fine;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface FineService {
-    FineResponse createFineForLateReturn(FineRequest fineRequest) throws Exception;
+    Fine createFineForLateReturn(Fine fine);
 
-    FineResponse viewFineById(int id) throws Exception;
+    FineResponse viewFineById(int id);
 
-    void deleteFine(int id) throws Exception;
+    FineResponse payFine(int id);
 
-    FineResponse payFine(int id) throws Exception;
+    void softDeleteFine(int id);
 
-    void softDeleteFine(int id) throws Exception;
+    List<FineResponse> filter(FineFilterRequest filter);
 
-    List<FineResponse> filter(FineFilterRequest filter) throws Exception;
+    boolean existsByBorrowId(int borrowId);
+
+    FineResponse getFineResponseOrThrow(int id);
+
+    void updateDaysLate(int id, int daysLate, BigDecimal fineAmount);
 }

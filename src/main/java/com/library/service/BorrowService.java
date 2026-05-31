@@ -1,7 +1,6 @@
 package com.library.service;
 
 import com.library.dto.request.BorrowFilterRequest;
-import com.library.dto.request.BorrowRequest;
 import com.library.dto.response.BorrowResponse;
 import com.library.model.Borrow;
 
@@ -17,4 +16,6 @@ public interface BorrowService {
     void softDeleteBorrow(int id);
 
     BorrowResponse returnBook(int id);
+
+    Borrow getAvailableBorrowOrThrow(int borrowId);
 }
