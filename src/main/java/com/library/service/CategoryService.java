@@ -22,4 +22,6 @@ public interface CategoryService {
     void softDeleteCategory(int id) ;
 
     List<BookResponse> viewAllBooksByCategory(int categoryId) ;
+
+    Category getAvailableCategoryOrThrow(int categoryId);
 }

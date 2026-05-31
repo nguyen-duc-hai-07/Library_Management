@@ -122,4 +122,12 @@ public class AuthorServiceImpl implements AuthorService {
 
         return books;
     }
+
+    public Author getAvailableAuthorOrThrow(int authorId) {
+        return authorRepository.findEntityById(authorId)
+                .orElseThrow(() -> {
+                    log.warn("Author not found with id={}", authorId);
+                    return new RuntimeException("Author not found");
+                });
+    }
 }
