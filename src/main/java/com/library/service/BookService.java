@@ -9,13 +9,13 @@ import com.library.model.Book;
 import java.util.List;
 
 public interface BookService {
-    BookResponse createBook(BookRequest bookRequest) ;
+    Book createBook(Book book) ;
 
     List<BookResponse> filter(BookFilterRequest filter) ;
 
     BookResponse viewBookById(int id) ;
 
-    BookResponse updateBook(int id, BookRequest bookRequest) ;
+    Book updateBook(int id, Book book) ;
 
     void softDeleteBook(int id) ;
 
