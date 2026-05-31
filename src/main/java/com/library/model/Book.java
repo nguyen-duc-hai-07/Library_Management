@@ -69,4 +69,18 @@ public class Book {
         this.author = author;
         this.category = category;
     }
+
+    public Book(String title, String description,
+                String isbn, String name, String publisher,
+                String publishYear, Author author, Category category
+    ) {
+        this.title = title;
+        this.description = description;
+        this.isbn = isbn;
+        this.name = name;
+        this.publisher = publisher;
+        this.publishYear = publishYear;
+        this.author = author;
+        this.category = category;
+    }
 }
