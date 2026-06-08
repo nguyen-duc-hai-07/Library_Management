@@ -119,4 +119,12 @@ public class CategoryServiceImpl implements CategoryService {
                     return new RuntimeException("Category not found");
                 });
     }
+
+    public Category getAvailableCategoryOrThrow(int categoryId) {
+        return categoryRepository.findEntityById(categoryId)
+                .orElseThrow(() -> {
+                    log.warn("Category not found with id={}", categoryId);
+                    return new RuntimeException("Category not found");
+                });
+    }
 }

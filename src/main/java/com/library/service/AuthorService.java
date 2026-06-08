@@ -4,6 +4,7 @@ import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.request.AuthorRequest;
 import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
+import com.library.model.Author;
 
 import java.util.List;
 
@@ -19,4 +20,6 @@ public interface AuthorService {
     void softDeleteAuthor(int id);
 
     List<BookResponse> viewAllBooksByAuthor(int authorId);
+
+    Author getAvailableAuthorOrThrow(int authorId);
 }

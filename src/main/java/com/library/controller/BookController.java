@@ -4,6 +4,7 @@ import com.library.dto.request.BookFilterRequest;
 import com.library.dto.request.BookRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.UserResponse;
+import com.library.facade.BookFacadeService;
 import com.library.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -16,8 +17,10 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final BookFacadeService bookFacadeService;
 
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService, BookFacadeService bookFacadeService) {
+        this.bookFacadeService = bookFacadeService;
         this.bookService = bookService;
     }
 
@@ -51,7 +54,7 @@ public class BookController {
 
         log.info("Create book");
 
-        return bookService.createBook(book);
+        return bookFacadeService.createBook(book);
     }
 
     @PutMapping("/{id}")
@@ -61,7 +64,7 @@ public class BookController {
 
         log.debug("Update request: id={}", id);
 
-        return bookService.updateBook(id, book);
+        return bookFacadeService.updateBook(id, book);
     }
 
     @PatchMapping("/{id}")

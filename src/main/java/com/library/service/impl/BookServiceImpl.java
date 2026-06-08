@@ -24,55 +24,16 @@ import java.util.List;
 @Transactional
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
-    private final CategoryRepository categoryRepository;
-    private final AuthorRepository authorRepository;
 
-    public BookServiceImpl(BookRepository bookRepository, CategoryRepository categoryRepository, AuthorRepository authorRepository) {
-        this.categoryRepository = categoryRepository;
-        this.authorRepository = authorRepository;
+    public BookServiceImpl(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
 
     @Override
-    public BookResponse createBook(BookRequest bookRequest)  {
+    public Book createBook(Book book)  {
         log.info("Create book");
 
-        Author author = authorRepository.findEntityById(bookRequest.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
-
-        Category category = categoryRepository.findEntityById(bookRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        Book book = Book.builder()
-                .title(bookRequest.getTitle())
-                .description(bookRequest.getDescription())
-                .isbn(bookRequest.getIsbn())
-                .name(bookRequest.getName())
-                .publisher(bookRequest.getPublisher())
-                .publishYear(bookRequest.getPublishYear())
-                .author(author)
-                .category(category)
-                .build();
-
-        Book savedBook = bookRepository.save(book);
-
-        log.info("Book created successfully with id={}", savedBook.getId());
-
-        return BookResponse.builder()
-                .id(savedBook.getId())
-                .title(savedBook.getTitle())
-                .description(savedBook.getDescription())
-                .isbn(savedBook.getIsbn())
-                .name(savedBook.getName())
-                .publisher(savedBook.getPublisher())
-                .publishYear(savedBook.getPublishYear())
-                .authorId(savedBook.getAuthor().getId())
-                .categoryId(savedBook.getCategory().getId())
-                .authorName(savedBook.getAuthor().getName())
-                .categoryName(savedBook.getCategory().getName())
-                .totalQuantity(savedBook.getTotalQuantity())
-                .availableQuantity(savedBook.getAvailableQuantity())
-                .build();
+        return bookRepository.save(book);
     }
 
     @Override
@@ -99,48 +60,12 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse updateBook(int id, BookRequest bookRequest)  {
+    public Book updateBook(int id, Book book)  {
         log.info("Update book with id={}", id);
 
-        Book books = getBookOrThrow(id);
+        getBookOrThrow(id);
 
-        Author author = authorRepository.findEntityById(bookRequest.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
-
-        Category category = categoryRepository.findEntityById(bookRequest.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        Book updatedBook = new Book(
-                books.getId(),
-                bookRequest.getTitle(),
-                bookRequest.getDescription(),
-                bookRequest.getIsbn(),
-                bookRequest.getName(),
-                bookRequest.getPublisher(),
-                bookRequest.getPublishYear(),
-                author,
-                category
-        );
-
-        Book saved = bookRepository.save(updatedBook);
-
-        log.info("Book updated successfully with id = {}", id);
-
-        return BookResponse.builder()
-                .id(saved.getId())
-                .title(saved.getTitle())
-                .isbn(saved.getIsbn())
-                .name(saved.getName())
-                .description(saved.getDescription())
-                .publisher(saved.getPublisher())
-                .publishYear(saved.getPublishYear())
-                .authorId(saved.getAuthor().getId())
-                .categoryId(saved.getCategory().getId())
-                .authorName(saved.getAuthor().getName())
-                .categoryName(saved.getCategory().getName())
-                .totalQuantity(saved.getTotalQuantity())
-                .availableQuantity(saved.getAvailableQuantity())
-                .build();
+        return bookRepository.save(book);
     }
 
     @Override
