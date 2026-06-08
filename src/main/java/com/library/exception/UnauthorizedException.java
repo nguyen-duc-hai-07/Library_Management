@@ -1,4 +1,4 @@
-package com.library.exception.exception_handler;
+package com.library.exception;
 
 public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException(String message) {
