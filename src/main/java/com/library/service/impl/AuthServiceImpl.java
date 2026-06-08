@@ -2,6 +2,7 @@ package com.library.service.impl;
 
 import com.library.dto.request.LoginRequest;
 import com.library.dto.request.RegisterRequest;
+import com.library.exception.auth.AuthUnauthorizedException;
 import com.library.model.User;
 import com.library.model.UserRole;
 import com.library.model.UserStatus;
@@ -46,11 +47,11 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> {
                     log.warn("User not found with email={}", request.getEmail());
-                    return new RuntimeException("Invalid email or password");
+                    return new AuthUnauthorizedException("Invalid email or password");
                 });
 
         if (!user.getPasswordHash().equals(request.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new AuthUnauthorizedException("Invalid email or password");
         }
 
         log.info("User logged in successfully");

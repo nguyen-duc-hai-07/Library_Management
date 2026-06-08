@@ -4,6 +4,8 @@ import com.library.dto.request.CategoryFilterRequest;
 import com.library.dto.request.CategoryRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.CategoryResponse;
+import com.library.exception.NotFoundException;
+import com.library.exception.category.CategoryNotFoundException;
 import com.library.model.Category;
 import com.library.repository.CategoryRepository;
 import com.library.service.CategoryService;
@@ -73,7 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findEntityById(id)
                 .orElseThrow(() -> {
                     log.warn("Category not found with id={}", id);
-                    return new RuntimeException("Category not found");
+                    return new CategoryNotFoundException(id);
                 });
 
         category.setName(request.getName());
@@ -116,7 +118,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findActiveById(id)
                 .orElseThrow(() -> {
                     log.warn("Category not found with id={}", id);
-                    return new RuntimeException("Category not found");
+                    return new CategoryNotFoundException(id);
                 });
     }
 
@@ -124,7 +126,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findEntityById(categoryId)
                 .orElseThrow(() -> {
                     log.warn("Category not found with id={}", categoryId);
-                    return new RuntimeException("Category not found");
+                    return new CategoryNotFoundException(categoryId);
                 });
     }
 }

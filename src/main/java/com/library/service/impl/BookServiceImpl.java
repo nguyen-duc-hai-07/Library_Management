@@ -1,15 +1,12 @@
 package com.library.service.impl;
 
 import com.library.dto.request.BookFilterRequest;
-import com.library.dto.request.BookRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.UserResponse;
-import com.library.model.Author;
+import com.library.exception.book.BookBadRequestException;
+import com.library.exception.book.BookNotFoundException;
 import com.library.model.Book;
-import com.library.model.Category;
-import com.library.repository.AuthorRepository;
 import com.library.repository.BookRepository;
-import com.library.repository.CategoryRepository;
 import com.library.service.BookService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -30,14 +27,14 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book createBook(Book book)  {
+    public Book createBook(Book book) {
         log.info("Create book");
 
         return bookRepository.save(book);
     }
 
     @Override
-    public List<BookResponse> filter(BookFilterRequest filter)  {
+    public List<BookResponse> filter(BookFilterRequest filter) {
         log.info("View books with filter: keyword={}, page={}, size={}",
                 filter.getKeyword(),
                 filter.getPage(),
@@ -49,7 +46,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse viewBookById(int id)  {
+    public BookResponse viewBookById(int id) {
         log.info("View book with id={}", id);
 
         BookResponse books = getBookResponseOrThrow(id); //hàm check id tồn tại
@@ -60,7 +57,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Book updateBook(int id, Book book)  {
+    public Book updateBook(int id, Book book) {
         log.info("Update book with id={}", id);
 
         getBookOrThrow(id);
@@ -69,7 +66,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public void softDeleteBook(int id)  {
+    public void softDeleteBook(int id) {
         log.info("Soft delete book with id={}", id);
 
         getBookOrThrow(id);
@@ -80,7 +77,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<UserResponse> viewAllUsersByBook(int bookId)  {
+    public List<UserResponse> viewAllUsersByBook(int bookId) {
         log.info("View all users with bookId = {}", bookId);
 
         getBookResponseOrThrow(bookId);
@@ -93,7 +90,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookResponse updateQuantity(int id, int quantity)  {
+    public BookResponse updateQuantity(int id, int quantity) {
         log.info("Update quantity of book with id={}", id);
 
         getBookOrThrow(id);
@@ -109,7 +106,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findEntityById(id)
                 .orElseThrow(() -> {
                     log.warn("Book not found with id={}", id);
-                    return new RuntimeException("Book not found");
+                    return new BookNotFoundException(id);
                 });
     }
 
@@ -117,7 +114,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findActiveBookById(id)
                 .orElseThrow(() -> {
                     log.warn("Book not found with id={}", id);
-                    return new RuntimeException("Book not found");
+                    return new BookNotFoundException(id);
                 });
     }
 
@@ -125,11 +122,11 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findEntityById(bookId)
                 .orElseThrow(() -> {
                     log.warn("Book not found with id={}", bookId);
-                    return new RuntimeException("Book not found");
+                    return new BookNotFoundException(bookId);
                 });
 
         if (book.getAvailableQuantity() <= 0) {
-            throw new RuntimeException("Book is out of stock");
+            throw new BookBadRequestException("Book is out of stock");
         }
 
         return book;
