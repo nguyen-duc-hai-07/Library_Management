@@ -3,6 +3,7 @@ package com.library.facade.impl;
 import com.library.dto.request.FineFilterRequest;
 import com.library.dto.request.FineRequest;
 import com.library.dto.response.FineResponse;
+import com.library.exception.BadRequestException;
 import com.library.facade.FineFacadeService;
 import com.library.model.Borrow;
 import com.library.model.BorrowStatus;
@@ -33,20 +34,20 @@ public class FineFacadeServiceImpl implements FineFacadeService {
 
         if (fineService.existsByBorrowId(fineRequest.getBorrowId())) {
             log.warn("Fine already exists with borrow id = {}", fineRequest.getBorrowId());
-            throw new RuntimeException("Fine already exists");
+            throw new BadRequestException("Fine already exists");
         }
 
         Borrow borrow = borrowService.getAvailableBorrowOrThrow(fineRequest.getBorrowId());
 
         if (borrow.getStatus() == BorrowStatus.RETURNED) {
             log.warn("Borrow is already returned");
-            throw new RuntimeException("Borrow is already returned");
+            throw new BadRequestException("Borrow is already returned");
         }
 
         int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
         if (daysLate <= 0) {
             log.warn("Borrow is not late");
-            throw new RuntimeException("Borrow is not late");
+            throw new BadRequestException("Borrow is not late");
         }
 
         BigDecimal fineAmount = BigDecimal.valueOf(daysLate * 10000L);
@@ -84,7 +85,7 @@ public class FineFacadeServiceImpl implements FineFacadeService {
         int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
         if (daysLate <= 0) {
             log.warn("Borrow is not late");
-            throw new RuntimeException("Borrow is not late");
+            throw new BadRequestException("Borrow is not late");
         }
 
         BigDecimal fineAmount = BigDecimal.valueOf(daysLate * 10000);
@@ -117,7 +118,7 @@ public class FineFacadeServiceImpl implements FineFacadeService {
             int daysLate = (int) ChronoUnit.DAYS.between(borrow.getDueDate().toLocalDate(), LocalDate.now());
             if (daysLate <= 0) {
                 log.warn("Borrow is not late");
-                throw new RuntimeException("Borrow is not late");
+                throw new BadRequestException("Borrow is not late");
             }
 
             BigDecimal fineAmount = BigDecimal.valueOf(daysLate * 10000);
