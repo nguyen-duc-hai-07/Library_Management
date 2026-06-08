@@ -5,6 +5,7 @@ import com.library.dto.request.UserRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.FineResponse;
 import com.library.dto.response.UserResponse;
+import com.library.exception.NotFoundException;
 import com.library.model.User;
 import com.library.repository.UserRepository;
 import com.library.service.UserService;
@@ -139,7 +140,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findEntityById(id)
                 .orElseThrow(() -> {
                     log.warn("User not found with id={}", id);
-                    return new RuntimeException("User not found");
+                    return new NotFoundException("User not found");
                 });
     }
 
@@ -147,7 +148,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findActiveById(id)
                 .orElseThrow(() -> {
                     log.warn("User not found with id={}", id);
-                    return new RuntimeException("User not found");
+                    return new NotFoundException("User not found");
                 });
     }
 
@@ -156,7 +157,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findEntityById(userId)
                 .orElseThrow(() -> {
                     log.warn("User not found with id={}", userId);
-                    return new RuntimeException("User not found");
+                    return new NotFoundException("User not found");
                 });
     }
 }

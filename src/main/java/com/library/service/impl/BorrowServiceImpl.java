@@ -2,6 +2,7 @@ package com.library.service.impl;
 
 import com.library.dto.request.BorrowFilterRequest;
 import com.library.dto.response.BorrowResponse;
+import com.library.exception.NotFoundException;
 import com.library.model.Borrow;
 import com.library.repository.BorrowRepository;
 import com.library.service.BorrowService;
@@ -88,7 +89,7 @@ public class BorrowServiceImpl implements BorrowService {
         return borrowRepository.findActiveById(id)
                 .orElseThrow(() -> {
                     log.warn("Borrow not found with id = {}", id);
-                    return new RuntimeException("Borrow not found");
+                    return new NotFoundException("Borrow not found");
                 });
     }
 
@@ -96,7 +97,7 @@ public class BorrowServiceImpl implements BorrowService {
         return borrowRepository.findEntityById(borrowId)
                 .orElseThrow(() -> {
                     log.warn("Borrow not found with id = {}", borrowId);
-                    return new RuntimeException("Borrow not found");
+                    return new NotFoundException("Borrow not found");
                 });
     }
 }
