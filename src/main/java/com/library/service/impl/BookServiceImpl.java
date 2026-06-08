@@ -3,7 +3,8 @@ package com.library.service.impl;
 import com.library.dto.request.BookFilterRequest;
 import com.library.dto.response.BookResponse;
 import com.library.dto.response.UserResponse;
-import com.library.exception.NotFoundException;
+import com.library.exception.book.BookBadRequestException;
+import com.library.exception.book.BookNotFoundException;
 import com.library.model.Book;
 import com.library.repository.BookRepository;
 import com.library.service.BookService;
@@ -105,7 +106,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findEntityById(id)
                 .orElseThrow(() -> {
                     log.warn("Book not found with id={}", id);
-                    return new NotFoundException("Book not found");
+                    return new BookNotFoundException(id);
                 });
     }
 
@@ -113,7 +114,7 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findActiveBookById(id)
                 .orElseThrow(() -> {
                     log.warn("Book not found with id={}", id);
-                    return new NotFoundException("Book not found");
+                    return new BookNotFoundException(id);
                 });
     }
 
@@ -121,11 +122,11 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findEntityById(bookId)
                 .orElseThrow(() -> {
                     log.warn("Book not found with id={}", bookId);
-                    return new NotFoundException("Book not found");
+                    return new BookNotFoundException(bookId);
                 });
 
         if (book.getAvailableQuantity() <= 0) {
-            throw new NotFoundException("Book is out of stock");
+            throw new BookBadRequestException("Book is out of stock");
         }
 
         return book;

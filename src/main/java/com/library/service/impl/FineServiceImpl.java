@@ -3,6 +3,7 @@ package com.library.service.impl;
 import com.library.dto.request.FineFilterRequest;
 import com.library.dto.response.FineResponse;
 import com.library.exception.NotFoundException;
+import com.library.exception.fine.FineNotFoundException;
 import com.library.model.Borrow;
 import com.library.model.Fine;
 import com.library.model.FineStatus;
@@ -92,7 +93,7 @@ public class FineServiceImpl implements FineService {
         return fineRepository.findActiveById(id)
                 .orElseThrow(() -> {
                     log.warn("Fine not found with id={}", id);
-                    return new NotFoundException("Fine not found");
+                    return new FineNotFoundException(id);
                 });
     }
 

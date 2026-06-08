@@ -5,7 +5,7 @@ import com.library.dto.request.AuthorFilterRequest;
 import com.library.dto.request.AuthorRequest;
 import com.library.dto.response.AuthorResponse;
 import com.library.dto.response.BookResponse;
-import com.library.exception.NotFoundException;
+import com.library.exception.author.AuthorNotFoundException;
 import com.library.model.Author;
 import com.library.repository.AuthorRepository;
 import com.library.service.AuthorService;
@@ -66,7 +66,7 @@ public class AuthorServiceImpl implements AuthorService {
         AuthorResponse author = authorRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> {
                     log.warn("Author not found with id={}", id);
-                    return new NotFoundException("Author not found");
+                    return new AuthorNotFoundException(id);
                 });
         log.info("Author found successfully with id = {}", id);
         return author;
@@ -78,7 +78,7 @@ public class AuthorServiceImpl implements AuthorService {
         Author author = authorRepository.findEntityById(id)
                 .orElseThrow(() -> {
                     log.warn("Author not found with id={}", id);
-                    return new NotFoundException("Author not found");
+                    return new AuthorNotFoundException(id);
                 });
         author.setName(request.getName());
         author.setYear(request.getYear());
@@ -102,7 +102,7 @@ public class AuthorServiceImpl implements AuthorService {
         authorRepository.findEntityById(id)
                 .orElseThrow(() -> {
                     log.warn("Author not found with id={}", id);
-                    return new NotFoundException("Author not found");
+                    return new AuthorNotFoundException(id);
                 });
         authorRepository.softDelete(id);
         log.info("Author soft deleted successfully with id = {}", id);
@@ -114,7 +114,7 @@ public class AuthorServiceImpl implements AuthorService {
         authorRepository.findEntityById(authorId)
                 .orElseThrow(() -> {
                     log.warn("Author not found with authorId={}", authorId);
-                    return new NotFoundException("Author not found");
+                    return new AuthorNotFoundException(authorId);
                 });
 
         List<BookResponse> books = authorRepository.findBooksByAuthorId(authorId);
@@ -128,7 +128,7 @@ public class AuthorServiceImpl implements AuthorService {
         return authorRepository.findEntityById(authorId)
                 .orElseThrow(() -> {
                     log.warn("Author not found with id={}", authorId);
-                    return new NotFoundException("Author not found");
+                    return new AuthorNotFoundException(authorId);
                 });
     }
 }
